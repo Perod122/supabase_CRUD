@@ -5,13 +5,17 @@ import cors from "cors";
 import dotenv from "dotenv";
 import pageRoutes from "./routes/pageRoutes.js";
 import { supabase } from "./config/db.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT;
-
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173", // frontend origin
+    credentials: true
+  }));
+  app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(helmet());
 

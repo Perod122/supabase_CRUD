@@ -11,7 +11,7 @@ export const fLogic = create((set, get) => ({
     setEmail: (email) => set({ email }),
     setPassword: (password) => set({ password }),
     setLoading: (loading) => set({ loading }),
-
+   
     handleSignIn: async () => {
         const { email, password } = get(); // ✅ proper destructuring
 
@@ -23,11 +23,13 @@ export const fLogic = create((set, get) => ({
         set({ loading: true });
 
         try {
-            const { data } = await axios.post(`${BASE_URL}/api/signin`, { email, password });
+            const { data } = await axios.post(`${BASE_URL}/api/signin`, { email, password }, {
+                withCredentials: true,
+              });
+              
 
             if (data.success) {
                 toast.success("Login successful");
-                console.log("Login successful");
                 window.location.href = "/home"; // redirect on success
             } else {
                 toast.error(data.error || "Login failed");
@@ -38,4 +40,42 @@ export const fLogic = create((set, get) => ({
             set({ loading: false });
         }
     },
-}));
+    handleSignUp: async () => {
+        const {email, password} = get();
+
+        if(!email || !password){
+            toast.error("Please input all fields");
+            return;
+        }
+
+        set({loading: true});
+
+        try {
+            const { data } = await axios.post(`${BASE_URL}/api/signup`, { email, password });
+            if (data.success) {
+                toast.success("Signup successful");
+                console.log("Signup successful");
+                window.location.href = "/home"; // redirect on success
+            } else {
+                toast.error(data.error || "Signup failed");
+            }
+            
+        } catch (error) {
+            toast.error(error.response?.data?.error || "An error occurred");
+        }finally {
+            set({ loading: false });
+        }
+    },
+    handleSignOut: async () => {
+        try {
+          await axios.post(`${BASE_URL}/api/signout`, {}, { withCredentials: true });
+          window.location.href = "/";
+        } catch (err) {
+          toast.error("Error logging out");
+        }
+      }
+      
+    
+    
+}
+));

@@ -1,20 +1,37 @@
-import LoginPage from "./pages/loginPage";
-import Dashboard from "./pages/dashboard";
-import {Routes, Route} from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import Dashboard from "./pages/Dashboard";
+import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-
-
+import Register from "./pages/Register";
+import PrivateRoute from "./components/PrivateRoute";
+import AuthRedirect from "./components/AuthRedirect";
 
 function App() {
   return (
-    <div>
+    <>
       <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/home" element={<Dashboard />} />
+        {/* Public pages */}
+        <Route path="/" element={
+          <AuthRedirect>
+            <LoginPage />
+          </AuthRedirect>
+        } />
+        <Route path="/signup" element={
+          <AuthRedirect>
+            <Register />
+          </AuthRedirect>
+        } />
+
+        {/* Protected page */}
+        <Route path="/home" element={
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        } />
       </Routes>
-      <Toaster/>
-    </div>
-  )
+      <Toaster />
+    </>
+  );
 }
 
-export default App
+export default App;
