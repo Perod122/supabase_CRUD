@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import Register from "./pages/Register";
 import PrivateRoute from "./components/PrivateRoute";
 import AuthRedirect from "./components/AuthRedirect";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -26,6 +27,11 @@ function App() {
         <Route path="/home" element={
           <PrivateRoute>
             <Dashboard />
+          </PrivateRoute>
+        } />
+        <Route path="/settings" element={
+          <PrivateRoute>
+            <Settings />
           </PrivateRoute>
         } />
       </Routes>

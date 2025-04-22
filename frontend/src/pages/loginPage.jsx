@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { fLogic } from '../store/flogic';
+import { fLogic } from '../store/fLogic';
 import { Link } from 'react-router-dom'; // Make sure you're using React Router
 
 function LoginPage() {
@@ -55,7 +54,7 @@ function LoginPage() {
                   }`}
                   disabled={loading}
                 >
-                  {loading ? 'Logging In...' : 'Log In'}
+                  {loading ? <div className="loading loading-spinner loading-lg"/> : 'Log In'}
                 </button>
               </div>
               <div className="text-center">

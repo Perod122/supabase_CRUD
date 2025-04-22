@@ -29,7 +29,6 @@ export const fLogic = create((set, get) => ({
               
 
             if (data.success) {
-                toast.success("Login successful");
                 window.location.href = "/home"; // redirect on success
             } else {
                 toast.error(data.error || "Login failed");
@@ -54,7 +53,6 @@ export const fLogic = create((set, get) => ({
             const { data } = await axios.post(`${BASE_URL}/api/signup`, { email, password });
             if (data.success) {
                 toast.success("Signup successful");
-                console.log("Signup successful");
                 window.location.href = "/home"; // redirect on success
             } else {
                 toast.error(data.error || "Signup failed");
@@ -74,8 +72,5 @@ export const fLogic = create((set, get) => ({
           toast.error("Error logging out");
         }
       }
-      
-    
-    
 }
 ));

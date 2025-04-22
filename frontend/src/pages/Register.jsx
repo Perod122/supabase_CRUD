@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fLogic } from '../store/flogic'
+import { fLogic } from '../store/fLogic'
 
 function Register() {
     const {

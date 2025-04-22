@@ -1,21 +1,19 @@
 // src/components/PrivateRoute.jsx
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from "react";
 import { Navigate } from "react-router-dom";
-
-const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "";
+import useAuth from "../hooks/useAuth";
 
 function PrivateRoute({ children }) {
-  const [authenticated, setAuthenticated] = useState(null);
+  const authenticated = useAuth();
 
-  useEffect(() => {
-    axios.get(`${BASE_URL}/api/session`, { withCredentials: true })
-      .then(res => setAuthenticated(res.data.success))
-      .catch(() => setAuthenticated(false));
-  }, []);
-
-  if (authenticated === null) return <div>Loading...</div>;
-
+  if (authenticated === null){
+    return (
+      <div className="flex justify-center items-center h-64">
+      <div className="loading loading-spinner loading-lg"/>
+      </div>
+  )
+    
+  } 
   if (!authenticated) return <Navigate to="/" replace />;
   return children;
 }

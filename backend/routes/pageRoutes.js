@@ -1,24 +1,19 @@
 import express from "express";
 import { updateProduct, createProduct, getProducts, getProductById } from "../controller/productController.js";
-import { signUp, signIn, signOut, checkSession } from "../controller/authController.js";
+import { signUp, signIn, signOut, checkSession as checkSessionHandler } from "../controller/authController.js";
+import checkSession from "../middleware/checkSession.js"; // This stays as is
 
 const router = express.Router();
-
+router.get("/session", checkSession, checkSessionHandler); 
+// Products
 router.get("/", getProducts);
 router.post("/", createProduct);
+router.get("/:id", getProductById); // dynamic route should be at the bottom
+router.put("/:id", updateProduct);
 
-// ✅ Put this before :id
-router.get("/session", checkSession);
-
+// Auth
 router.post("/signup", signUp);
 router.post("/signin", signIn);
 router.post("/signout", signOut);
-
-router.get("/:id", getProductById); // move this to the bottom of your GET routes
-router.put("/:id", updateProduct);
-
-// Rule of Thumb
-//Always define specific routes before dynamic ones like /:id, or else Express will interpret anything (even strings like "session") as an id.
-
 
 export default router;
