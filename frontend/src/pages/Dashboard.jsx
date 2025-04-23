@@ -7,6 +7,7 @@ function Dashboard() {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+  //hello test
   return (
     <main className="mx-auto px-4 py-8 max-w-6xl">
       <div className="flex justify-between items-center mb-8">
