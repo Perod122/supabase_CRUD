@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useProductStore } from '../store/useProductStore';
 import {PackageIcon,PlusCircleIcon, RefreshCwIcon } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import AddProductModal from '../components/AddProductModal';
 function Dashboard() {
   const {products, loading, error, fetchProducts} = useProductStore();
   useEffect(() => {
@@ -11,7 +12,7 @@ function Dashboard() {
   return (
     <main className="mx-auto px-4 py-8 max-w-6xl">
       <div className="flex justify-between items-center mb-8">
-        <button className="btn btn-primary">
+        <button className="btn btn-primary " onClick={() => document.getElementById("add-product-modal").showModal()}>
         <PlusCircleIcon className="size-5 mr-2" />
         Add Product
         </button>
@@ -35,7 +36,7 @@ function Dashboard() {
         </div>
         </div>
       )}
-
+      <AddProductModal/>
       {loading ? (
           <div className="flex justify-center items-center h-64">
           <div className="loading loading-spinner loading-lg"/>
