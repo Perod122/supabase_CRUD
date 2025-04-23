@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import PrivateRoute from "./components/PrivateRoute";
 import AuthRedirect from "./components/AuthRedirect";
 import Settings from "./pages/Settings";
+import Navbar from "./components/Navbar";
 
 function App() {
   return (
@@ -26,11 +27,13 @@ function App() {
         {/* Protected page */}
         <Route path="/home" element={
           <PrivateRoute>
+            <Navbar />
             <Dashboard />
           </PrivateRoute>
         } />
         <Route path="/settings" element={
           <PrivateRoute>
+            <Navbar />
             <Settings />
           </PrivateRoute>
         } />

@@ -8,8 +8,6 @@ export const getProducts = async (req, res) => {
             .order("created_at", { ascending: false });
 
         if (error) throw error;
-
-        console.log("Fetched products:", products);
         res.status(200).json({ success: true, data: products });
     } catch (error) {
         console.error("Error getProducts:", error);
