@@ -23,16 +23,16 @@ export const createProduct = async (req, res) => {
     }
 
     try {
-        const { data: newProduct, error } = await supabase
+        const newProduct = await supabase
             .from("Products")
             .insert({ productName, productPrice, productImage })
             .select()
             .single();
 
-        if (error) throw error;
-
+            if (newProduct.error) throw newProduct.error;
+            
         console.log("Created product:", newProduct);
-        res.status(201).json({ success: true, data: newProduct });
+        res.status(201).json({ success: true, data: newProduct.data });
     } catch (error) {
         console.error("Error createProduct:", error);
         res.status(500).json({ success: false, message: "Server error" });
