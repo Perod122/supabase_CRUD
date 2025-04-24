@@ -1,4 +1,4 @@
-import { DollarSign, PackageIcon, PlusCircleIcon } from "lucide-react";
+import { DollarSign, ImageIcon, PackageIcon, PlusCircleIcon } from "lucide-react";
 import { useProductStore } from "../store/useProductStore";
 
 function AddProductModal() {
@@ -69,7 +69,7 @@ function AddProductModal() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/50">
-                  <PackageIcon className="size-5" />
+                  <ImageIcon className="size-5" />
                 </div>
                 <input
                   type="text"

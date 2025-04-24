@@ -1,6 +1,7 @@
 import { EditIcon, Trash2Icon } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useProductStore } from "../store/useProductStore";
+import DeleteConfirmationDialog from "./DeleteDialog";
+import { useProductStore } from "@/store/useProductStore";
 
 function ProductCard({ product }) {
     const {deleteProduct} = useProductStore();
@@ -12,16 +13,21 @@ function ProductCard({ product }) {
 
             <div className="card-body">
                 <h2 className="card-title text-lg font-semibold">{product.productName}</h2>
-                <p className="text-2xl font-bold text-primary">${Number(product.productPrice).toFixed(2)}</p>
+                <p className="text-2xl font-bold">${Number(product.productPrice).toFixed(2)}</p>
                 
                 <div className="card-actions justify-end mt-4">
                     <Link to={`/product/${product.id}`} className="btn btn-sm btn-info btn-outline">
                         <EditIcon className="size-4" />
                     </Link>
 
-                    <button className="btn btn-sm btn-error btn-outline" onClick={() => deleteProduct(product.id)}>
+                    <DeleteConfirmationDialog
+                        onConfirm={() => deleteProduct(product.id)}
+                        trigger={
+                        <button className="btn btn-sm btn-error btn-outline">
                         <Trash2Icon className="size-4" />
                     </button>
+                        }
+                     />
                 </div>
             </div>
         </div>

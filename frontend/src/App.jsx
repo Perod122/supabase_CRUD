@@ -7,39 +7,24 @@ import PrivateRoute from "./components/PrivateRoute";
 import AuthRedirect from "./components/AuthRedirect";
 import Settings from "./pages/Settings";
 import Navbar from "./components/Navbar";
+import { useThemeStore } from "./store/useThemeStore";
 
 function App() {
+  const {theme} = useThemeStore();
   return (
-    <>
+    <div className="min-h-screen bg-base-200 transition-colors duration-300" data-theme={theme}>
+    
       <Routes>
         {/* Public pages */}
-        <Route path="/" element={
-          <AuthRedirect>
-            <LoginPage />
-          </AuthRedirect>
-        } />
-        <Route path="/signup" element={
-          <AuthRedirect>
-            <Register />
-          </AuthRedirect>
-        } />
+        <Route path="/" element={<AuthRedirect><LoginPage /></AuthRedirect>} />
+        <Route path="/signup" element={<AuthRedirect><Register /></AuthRedirect>} />
 
         {/* Protected page */}
-        <Route path="/home" element={
-          <PrivateRoute>
-            <Navbar />
-            <Dashboard />
-          </PrivateRoute>
-        } />
-        <Route path="/settings" element={
-          <PrivateRoute>
-            <Navbar />
-            <Settings />
-          </PrivateRoute>
-        } />
+        <Route path="/home" element={<PrivateRoute><Navbar /><Dashboard /></PrivateRoute>} />
+        <Route path="/settings" element={<PrivateRoute><Navbar /><Settings /></PrivateRoute>} />
       </Routes>
       <Toaster />
-    </>
+      </div>
   );
 }
 
