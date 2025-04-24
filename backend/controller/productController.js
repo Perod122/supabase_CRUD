@@ -83,3 +83,17 @@ export const updateProduct = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error" });
     }
 }
+ export const deleteProduct = async (req, res) => {
+        const {id} = req.params;
+        try {
+            const deletedProd = await supabase.from("Products").delete().eq("id", id)
+            if (deletedProd.count === 0 ) {
+                return res.status(404).json({success: false, message: "Product not found"});
+            }
+            console.log("Deleted Product", deletedProd);
+            res.status(200).json({success: true, data: deletedProd})
+        } catch (error) {
+            console.log("Failed to delete a product. Try again later");
+            res.status(500).json({success: false, message: "Error deleting a product"});
+        }
+ }
