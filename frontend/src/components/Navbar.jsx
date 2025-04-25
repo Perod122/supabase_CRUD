@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import { useResolvedPath } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { LogOutIcon, LucideTabletSmartphone, SettingsIcon, User2Icon, UserIcon } from "lucide-react";
+import { LogOutIcon, LucideTabletSmartphone, SettingsIcon, ShoppingBagIcon, User2Icon, UserIcon } from "lucide-react";
 import { fLogic } from '../store/fLogic';
 import ThemeSelector from './ThemeSelector';
 
@@ -9,9 +8,6 @@ function Navbar() {
   const handleSignOut = fLogic((state) => state.handleSignOut);
   const fetchUser = fLogic((state) => state.fetchUser);
   const user = fLogic((state) => state.user);
-
-  const { pathname } = useResolvedPath();
-  const isHomePage = pathname === "/home";
 
   useEffect(() => {
     fetchUser();
@@ -26,9 +22,9 @@ function Navbar() {
             <div className="flex items-stretch">
               <Link to="/home" className="hover:opacity-80 transition-opacity">
                 <div className="flex items-center space-x-2">
-                  <LucideTabletSmartphone className="size-9 text-primary" />
-                  <span className="font-semibold font-mono tracking-widest text-2xl bg-clip-text text-gray-600 bg-gradient-to-r from-primary to-secondary">
-                    Perodize
+                  <ShoppingBagIcon className="size-9 text-blue-400" />
+                  <span className="font-semibold font-mono tracking-widest text-2xl bg-clip-text bg-gradient-to-r from-primary to-secondary">
+                    Shopperod
                   </span>
                 </div>
               </Link>
@@ -38,7 +34,6 @@ function Navbar() {
           {/* Right Section */}
           <div className="flex items-center gap-4">
             <ThemeSelector />
-            {isHomePage && (
               <div className="dropdown dropdown-end">
                 <button className="btn btn-ghost btn-circle">
                   <UserIcon className="size-7" />
@@ -72,7 +67,6 @@ function Navbar() {
               </ul>
 
               </div>
-            )}
           </div>
         </div>
       </div>

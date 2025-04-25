@@ -8,6 +8,7 @@ import AuthRedirect from "./components/AuthRedirect";
 import Settings from "./pages/Settings";
 import Navbar from "./components/Navbar";
 import { useThemeStore } from "./store/useThemeStore";
+import ProductPage from "./pages/ProductPage";
 
 function App() {
   const {theme} = useThemeStore();
@@ -22,6 +23,7 @@ function App() {
         {/* Protected page */}
         <Route path="/home" element={<PrivateRoute><Navbar /><Dashboard /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><Navbar /><Settings /></PrivateRoute>} />
+        <Route path="/product/:id" element={<PrivateRoute><Navbar /><ProductPage /></PrivateRoute>} />
       </Routes>
       <Toaster />
       </div>
