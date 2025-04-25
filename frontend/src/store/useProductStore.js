@@ -63,6 +63,30 @@ export const useProductStore = create((set, get) => ({
         }finally{
             set({loading: false})
         }
+    },
+    fetchProduct: async (id) => {
+        set({loading: true})
+        try {
+            const response = await axios.get(`${BASE_URL}/api/${id}`);
+            set({currentProduct: response.data.data, formData:response.data.data, error: null})
+        } catch (error) {
+            set({error: "An error has occured. Please try again later", currentProduct: null});
+        }finally{
+            set({loading: false});
+        }
+    },
+    updateProduct: async (id) => {
+        set({loading: true})
+        try {
+            const {formData} = get();
+            const response = await axios.put(`${BASE_URL}/api/${id}`, formData);
+            set({currentProduct: response.data.data, error: null});
+            toast.success("Product updated successfully!")
+        } catch (error) {
+            set({error: "An error has occured. Please try again later", currentProduct: null});
+        }finally{
+            set({loading: false})
+        }
     }
 }
 ));
