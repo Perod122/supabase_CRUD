@@ -1,27 +1,81 @@
 import { supabase } from "../config/db.js"
-import { setAuthCookie } from "../utils/authHelper.js";
+import { setAuthCookie } from "../utils/authHelper.js"; // make sure this is correctly imported
+
 export const signUp = async (req, res) => {
-    const { email, password } = req.body;
+  const { firstName, lastName, phone, gender, email, password } = req.body;
 
-    if (!email || !password) {
-        return res.status(400).json({ success: false, message: "Please provide all fields" });
-    }
+  if (!email || !password || !firstName || !lastName || !phone) {
+    console.log("Missing fields in signUp request:", req.body);
+    return res.status(400).json({ success: false, message: "Please provide all fields" });
+  }
 
-    try {
-        const { user, error } = await supabase.auth.signUp({
-            email,
-            password,
-        });
+  try {
+    // Step 1: Sign up the user
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-        if (error) throw error;
+    if (signUpError) throw signUpError;
 
-        console.log("User signed up:", user);
-        res.status(201).json({ success: true, data: user });
-    } catch (error) {
-        console.error("Error signUp:", error);
-        res.status(500).json({ success: false, message: "Server error" });
-    }
-}
+    const user = signUpData.user;
+
+    // Step 2: Manually sign in the user to get the access token (needed for setting cookie)
+    const { data: sessionData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) throw signInError;
+
+    const session = sessionData.session;
+    const userId = session.user.id;
+
+    // Step 3: Insert into profiles table
+    const { error: insertError } = await supabase
+      .from("profiles")
+      .insert([
+        {
+          id: userId, // match auth.users.id
+          firstname: firstName,
+          lastname: lastName,
+          phone,
+          gender,
+        },
+      ]);
+
+    if (insertError) throw insertError;
+
+    // Step 4: Set the access_token in HTTP-only cookie
+    res.cookie("access_token", session.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
+
+    console.log("User and profile created:", user);
+    return res.status(201).json({
+      success: true,
+      message: "User signed up and logged in",
+      user,
+      profile: {
+        firstname: firstName,
+        lastname: lastName,
+        phone,
+        gender,
+      },
+    });
+  } catch (error) {
+    console.error("Error during signUp:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
 
 export const signIn = async (req, res) => {
   const { email, password } = req.body;
@@ -60,6 +114,18 @@ export const signIn = async (req, res) => {
         return res.status(401).json({ success: false, message: "Invalid token" });
       }
 
+       // Fetch profile from "profiles" table based on user.id
+        const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", user.id)
+            .single();
+
+        if (profileError) {
+            console.error("Error fetching profile:", profileError.message);
+            return res.status(500).json({ success: false, message: "Failed to fetch profile" });
+        }
+        
       // ROLL the cookie — refresh expiry
       res.cookie("access_token", access_token, {
         httpOnly: true,
@@ -68,15 +134,42 @@ export const signIn = async (req, res) => {
         maxAge: 60 * 60 * 1000, // reset to 1 hour
       });
 
-      return res.status(200).json({ success: true, user });
+      return res.status(200).json({
+         success: true, 
+         user, profile,
+            creds: {
+                email: user.email,
+                phone: user.phone,
+            },
+        });
     } catch (err) {
       return res.status(500).json({ success: false, message: "Server error", error: err.message });
     }
   };
 
 
-    export const signOut = async (req, res) => {
-        res.clearCookie('access_token');
-        res.status(200).json({ success: true, message: "Logged out" });
-        };
+  export const signOut = async (req, res) => {
+    try {
+      // Clear the cookie that stores the access token
+      res.clearCookie('access_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Lax',
+      });
+  
+      // Optional: Invalidate session via Supabase if using server-side auth management
+      const { error } = await supabase.auth.signOut();
+  
+      if (error) {
+        console.error("Supabase signOut error:", error.message);
+        return res.status(500).json({ success: false, message: "Error logging out" });
+      }
+  
+      res.status(200).json({ success: true, message: "Logged out successfully" });
+    } catch (err) {
+      console.error("Error in signOut:", err);
+      res.status(500).json({ success: false, message: "Server error during sign out" });
+    }
+  };
+  
 

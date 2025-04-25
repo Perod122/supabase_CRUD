@@ -7,11 +7,13 @@ import { useEffect } from 'react';
 function Settings() {
   const navigate = useNavigate();
   const fetchUser = fLogic((state) => state.fetchUser);
+  const creds = fLogic((state) => state.creds);
   const user = fLogic((state) => state.user);
 
   useEffect(() => {
       fetchUser();
     }, [fetchUser]);
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <button className="btn btn-ghost mb-2" onClick={() => navigate(-1)}>
@@ -21,11 +23,13 @@ function Settings() {
       <div className="card bg-base-100 shadow-lg">
         <div className="card-body">
         <h1 className="card-title text-2xl mb-6">Settings</h1>
+        {creds && (
+          <span className="font-mono font-medium text-base-content  text-sm">{creds?.email}</span>   
+        )}
         {user && (
-          <span className="font-mono font-medium text-base-content  text-sm">{user.email}</span>      
+          <span className="font-mono font-medium text-base-content  text-sm">{user?.phone}</span>   
         )}
         </div>
-        
         </div>
       
     </div>

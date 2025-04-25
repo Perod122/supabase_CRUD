@@ -4,11 +4,21 @@ import toast from 'react-hot-toast';
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : ""
 export const fLogic = create((set, get) => ({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    gender: "",
     email: "",
     password: "",
     loading: false,
     user: null,
+    creds: null,
 
+    setCreds: (creds) => set({ creds }),
+    setFirstName: (firstName) => set({ firstName }),
+    setLastName: (lastName) => set({ lastName }),
+    setPhone: (phone) => set({ phone }),
+    setGender: (gender) => set({ gender}),
     setUser: (userData) => set({user: userData}),
     setEmail: (email) => set({ email }),
     setPassword: (password) => set({ password }),
@@ -21,7 +31,8 @@ export const fLogic = create((set, get) => ({
           });
       
           if (data.success) {
-            set({ user: data.user }); // Store the whole user object
+            set({ user: data.profile }); // Store the whole user object
+            set({ creds: data.creds }); // Store the credentials if needed to get the email
           } else {
             console.warn("Session check failed:", data.message);
           }
@@ -59,9 +70,9 @@ export const fLogic = create((set, get) => ({
         }
     },
     handleSignUp: async () => {
-        const {email, password} = get();
+        const {firstName, lastName, phone, gender, email, password} = get();
 
-        if(!email || !password){
+        if(!email || !password || !firstName || !lastName || !phone){
             toast.error("Please input all fields");
             return;
         }
@@ -69,7 +80,9 @@ export const fLogic = create((set, get) => ({
         set({loading: true});
 
         try {
-            const { data } = await axios.post(`${BASE_URL}/api/signup`, { email, password });
+            const { data } = await axios.post(`${BASE_URL}/api/signup`, { firstName, lastName, phone, gender, email, password }, {
+              withCredentials: true,
+            });
             if (data.success) {
                 toast.success("Signup successful");
                 await get().fetchUser();
@@ -85,13 +98,17 @@ export const fLogic = create((set, get) => ({
         }
     },
     handleSignOut: async () => {
-        set({user:null})
+      set({loading: true});
         try {
           await axios.post(`${BASE_URL}/api/signout`, {}, { withCredentials: true });
-          window.location.href = "/";
+          set({user:null})
+          set({creds:null})
+          window.location.href = "/"; // redirect on success
         } catch (err) {
           toast.error("Error logging out");
-        }
+        }finally {
+          set({ loading: false });
+      }
       }
 }
 ));

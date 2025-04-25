@@ -9,10 +9,17 @@ function Navbar() {
   const fetchUser = fLogic((state) => state.fetchUser);
   const user = fLogic((state) => state.user);
 
+  const getInitials = () => {
+    if (!user?.firstname && !user?.lastname) return '?';
+    const firstInitial = user?.firstname ? user.firstname.charAt(0).toUpperCase() : '';
+    const lastInitial = user?.lastname ? user.lastname.charAt(0).toUpperCase() : '';
+    return `${firstInitial}${lastInitial}`;
+  };
+  
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
-
+  
   return (
     <div className="bg-base-100/80 backdrop-blur-lg border-b border-base-content/10 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto">
@@ -36,14 +43,18 @@ function Navbar() {
             <ThemeSelector />
               <div className="dropdown dropdown-end">
                 <button className="btn btn-ghost btn-circle">
-                  <UserIcon className="size-7" />
+                  <div className="flex items-center justify-center border border-base-content size-8 rounded-full bg-base-200 text-base-content font-medium">
+                          {getInitials()}
+                        </div>
                 </button>
 
                 <ul className="dropdown-content mt-3 shadow-xl bg-base-200 text-base-content rounded-box w-56 p-2 space-y-2 z-[1] border border-base-content/10">
                   {user && (
                       <li className="flex items-center gap-3 px-3 py-2 rounded-md transition">
                         <User2Icon className="text-base-content" />
-                        <span className="font-mono font-medium text-base-content  text-sm">{user.email}</span>
+                        <span className="font-mono font-medium text-base-content text-sm">
+                          {user?.firstname && user?.lastname && `${user.firstname} ${user.lastname}`}
+                        </span>
                       </li>
                     )}
                   <li>

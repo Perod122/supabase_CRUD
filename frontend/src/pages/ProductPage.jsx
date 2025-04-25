@@ -45,7 +45,7 @@ function ProductPage() {
                 Go back
             </button>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="rounded-lg overflow-hidden shadow-lg bg-base-100">
+                <div className="rounded-lg overflow-hidden max-h-auto shadow-lg bg-base-100">
                     <img src={currentProduct?.productImage} alt={currentProduct?.productNamename} className="size-full object-cover" />
                 </div>
                 {/* PRODUCT FORM */}
@@ -97,12 +97,12 @@ function ProductPage() {
                             />
                         </div>
                         {/* SUBMIT BUTTON */}
-                        <div className="flex justify-between mt-8">
+                        <div className="flex justify-end space-x-2 mt-8">
                         <DeleteConfirmationDialog
                         onConfirm={() => deleteProduct(product.id)}
                         trigger={
                         <button className="btn btn-primary btn-warning btn-outline">
-                        <Trash2Icon className="size-4" /> Delete Product
+                        <Trash2Icon className="size-4" />Delete
                     </button>
                         }
                      />
@@ -112,7 +112,7 @@ function ProductPage() {
                                 ) : (
                                     <>
                                     <SaveIcon className="size-5 mr-2" />
-                                    Save Changes
+                                    Save
                                     </>
                                 )}
                             </button>
