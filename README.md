@@ -8,6 +8,7 @@ A full-stack authentication app built using **Supabase**, **Express.js**, and **
 
 - ✅ User registration with email & password (via Supabase Auth)
 - 📇 Adds user info (first name, last name, phone, gender) to `profiles` table
+- ✅ CRUD Products (ProductName, ProductPrice, ProductImage) to `Products` table
 - 🔒 Authentication session management via **HTTP-only cookies**
 - 🚪 Secure sign in and sign out logic
 - 👤 Check session and auto-fetch user info on page load
