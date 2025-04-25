@@ -23,7 +23,9 @@ export const useProductStore = create((set, get) => ({
         set({loading: true});
         try {
             const {formData} = get();
-            await axios.post(`${BASE_URL}/api/create`, formData);
+            await axios.post(`${BASE_URL}/api/create`, formData, {
+                withCredentials: true, // 🔥 very important
+              });
             await get().fetchProducts();
             get().resetForm()
             toast.success("Product Added Successfully");
@@ -38,7 +40,9 @@ export const useProductStore = create((set, get) => ({
         set({loading: true})
 
         try {
-            const response = await axios.get(`${BASE_URL}/api/products`);
+            const response = await axios.get(`${BASE_URL}/api/products`, {
+                withCredentials: true, // 🔥 very important
+              });
             set({products: response.data.data, error: null});
         } catch (err) {
             const errorMessage = 
@@ -54,7 +58,9 @@ export const useProductStore = create((set, get) => ({
     deleteProduct: async (id) => {
         set({loading: true})
         try {
-            await axios.delete(`${BASE_URL}/api/${id}`);
+            await axios.delete(`${BASE_URL}/api/${id}`, {
+                withCredentials: true, // 🔥 very important
+              });
             set(prev => ({products: prev.products.filter(product => product.id !== id)}));
             toast.success("Product Deleted successfully");
         } catch (error) {
@@ -67,7 +73,9 @@ export const useProductStore = create((set, get) => ({
     fetchProduct: async (id) => {
         set({loading: true})
         try {
-            const response = await axios.get(`${BASE_URL}/api/${id}`);
+            const response = await axios.get(`${BASE_URL}/api/${id}`, {
+                withCredentials: true, // 🔥 very important
+              });
             set({currentProduct: response.data.data, formData:response.data.data, error: null})
         } catch (error) {
             set({error: "An error has occured. Please try again later", currentProduct: null});
@@ -79,7 +87,9 @@ export const useProductStore = create((set, get) => ({
         set({loading: true})
         try {
             const {formData} = get();
-            const response = await axios.put(`${BASE_URL}/api/${id}`, formData);
+            const response = await axios.put(`${BASE_URL}/api/${id}`, formData, {
+                withCredentials: true, // 🔥 very important
+              });
             set({currentProduct: response.data.data, error: null});
             toast.success("Product updated successfully!")
         } catch (error) {

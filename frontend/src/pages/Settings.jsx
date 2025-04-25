@@ -22,7 +22,7 @@ function Settings() {
         <div className="card-body">
         <h1 className="card-title text-2xl mb-6">Settings</h1>
         {user && (
-          <span className="font-mono font-medium text-base-content  text-sm">{user.email}</span>
+          <span className="font-mono font-medium text-base-content  text-sm">{user.email}</span>      
         )}
         </div>
         

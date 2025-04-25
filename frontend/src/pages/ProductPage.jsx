@@ -34,13 +34,13 @@ function ProductPage() {
         if(error){
             return (
                 <div className="alert alert-error">
-                    toast.err({error})
+                    {error}
                 </div>
             );
         }
     return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+      <button className="btn btn-ghost mb-2" onClick={() => navigate(-1)}>
                 <ArrowLeftIcon className="size-5 mr-2" />
                 Go back
             </button>
@@ -101,7 +101,7 @@ function ProductPage() {
                         <DeleteConfirmationDialog
                         onConfirm={() => deleteProduct(product.id)}
                         trigger={
-                        <button className="btn btn-primary btn-error btn-outline">
+                        <button className="btn btn-primary btn-warning btn-outline">
                         <Trash2Icon className="size-4" /> Delete Product
                     </button>
                         }
