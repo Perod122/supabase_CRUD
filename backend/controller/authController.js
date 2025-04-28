@@ -171,5 +171,47 @@ export const signIn = async (req, res) => {
       res.status(500).json({ success: false, message: "Server error during sign out" });
     }
   };
+
+  export const updateProfile = async (req, res) => {
+    try {
+      const { firstname, lastname, phone } = req.body;
+      
+      const access_token = req.cookies?.access_token;
+      if (!access_token) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      }
+  
+      const { data: { user }, error: userError } = await supabase.auth.getUser(access_token);
+      if (userError) throw userError;
+      console.log(user)
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+  
+      console.log("Updating profile for user:", user.id);
+      console.log("New profile data:", { firstname, lastname, phone });
+  
+      const { data, error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          firstname,
+          lastname,
+          phone,
+        })
+        .eq('id', user.id)
+        .select(); // optional, to fetch updated data
+  
+      if (updateError) throw updateError;
+  
+      console.log("Update success:", data);
+  
+      return res.status(200).json({ success: true, message: "Profile updated successfully", updatedProfile: data });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      return res.status(500).json({ success: false, message: "Failed to update profile", error: error.message });
+    }
+  }
+  
+  
   
 
