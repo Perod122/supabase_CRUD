@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeftIcon, SaveIcon } from 'lucide-react';
+import { ArrowLeftIcon, Edit2Icon, SaveIcon, XIcon } from 'lucide-react';
 import { fLogic } from '../store/fLogic'; // adjust path if needed
 
 function Settings() {
@@ -11,6 +11,8 @@ function Settings() {
   const handleFormChange = fLogic((state) => state.handleFormChange);
   const updateProfile = fLogic((state) => state.updateProfile);
   const loading = fLogic((state) => state.loading);
+  
+  const [isEdit, setIsEdit] = useState(false); // Use useState to manage isEdit
 
   // Ensure loading state is handled without causing conditional hook calls
   useEffect(() => {
@@ -47,6 +49,7 @@ function Settings() {
                 className="input input-bordered w-full" 
                 value={form.firstname}
                 onChange={handleFormChange}
+                readOnly={!isEdit} // Condition based on isEdit
               />
             </div>
 
@@ -61,6 +64,7 @@ function Settings() {
                 className="input input-bordered w-full" 
                 value={form.lastname}
                 onChange={handleFormChange}
+                readOnly={!isEdit} // Condition based on isEdit
               />
             </div>
 
@@ -75,6 +79,7 @@ function Settings() {
                 className="input input-bordered w-full" 
                 value={form.phone}
                 onChange={handleFormChange}
+                readOnly={!isEdit} // Condition based on isEdit
               />
             </div>
 
@@ -87,22 +92,42 @@ function Settings() {
                 type="text"  
                 className="input input-bordered w-full" 
                 value={creds?.email || ""}
-                readOnly
+                readOnly // Email is always read-only
               />
             </div>
 
-            {/* Save Button */}
-            <button type="submit" className="btn btn-primary">
-              {loading ? (
-                <div className="loading loading-spinner loading-sm"/>
-              ) : (
-                <>
-                  <SaveIcon className="size-5 mr-2" />
-                  Save
-                </>
-              )}
-            </button>
+            <div className="flex justify-between space-x-2 mt-8">
+            {isEdit ? (
+              // Cancel Button (shown when isEdit is true)
+              <div 
+                className="btn btn-error btn-outline" 
+                onClick={() => setIsEdit(false)} // Set isEdit to false when clicked
+              >
+                <XIcon />
+                Cancel {/* Assuming you have an XIcon for Cancel */}
+              </div>
+            ) : (
+              // Edit Button (shown when isEdit is false)
+              <div 
+                className="btn btn-accent btn-outline" 
+                onClick={() => setIsEdit(true)} // Set isEdit to true when clicked
+              >
+                <Edit2Icon />
+              </div>
+            )}
 
+              {/* Save Button */}
+              <button type="submit" className="btn btn-primary"  disabled={!isEdit}>
+                {loading ? (
+                  <div className="loading loading-spinner loading-sm"/>
+                ) : (
+                  <>
+                    <SaveIcon className="size-5 mr-2" />
+                    Save
+                  </>
+                )}
+              </button>
+            </div>
           </form>
         </div>
       </div>
