@@ -9,6 +9,7 @@ function Navbar() {
   const fetchUser = fLogic((state) => state.fetchUser);
   const user = fLogic((state) => state.user);
 
+  const creds = fLogic((state) => state.creds);
   const getInitials = () => {
     if (!user?.firstname && !user?.lastname) return '?';
     const firstInitial = user?.firstname ? user.firstname.charAt(0).toUpperCase() : '';
@@ -49,11 +50,11 @@ function Navbar() {
                 </button>
 
                 <ul className="dropdown-content mt-3 shadow-xl bg-base-200 text-base-content rounded-box w-56 p-2 space-y-2 z-[1] border border-base-content/10">
-                  {user && (
+                  {creds && (
                       <li className="flex items-center gap-3 px-3 py-2 rounded-md transition">
                         <User2Icon className="text-base-content" />
                         <span className="font-mono font-medium text-base-content text-sm">
-                          {user?.firstname && user?.lastname && `${user.firstname} ${user.lastname}`}
+                          {creds?.email}
                         </span>
                       </li>
                     )}

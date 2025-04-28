@@ -7,7 +7,7 @@ export default function useAuth() {
   const [authenticated, setAuthenticated] = useState(null);
 
   useEffect(() => {
-    axios.get(`${BASE_URL}/api/session`, { withCredentials: true })
+    axios.get(`${BASE_URL}/api/products/session`, { withCredentials: true })
       .then(res => setAuthenticated(res.data.success))
       .catch(() => setAuthenticated(false));
   }, []);
