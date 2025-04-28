@@ -51,7 +51,6 @@ export const getProductById = async (req, res) => {
 
         if (error) throw error;
 
-        console.log("Fetched product:", product);
         res.status(200).json({ success: true, data: product });
     } catch (error) {
         console.error("Error getProductById:", error);
