@@ -1,4 +1,4 @@
-# 🔐 Supabase Auth + Profile CRUD App
+# 🔐 Shopperod (E-commerce App)
 
 A full-stack authentication app built using **Supabase**, **Express.js**, and **React**, allowing users to **sign up**, **sign in**, **sign out**, and store additional **profile information** (first name, last name, phone, gender) in a custom `profiles` table.
 
@@ -7,7 +7,6 @@ A full-stack authentication app built using **Supabase**, **Express.js**, and **
 ## 🚀 Features
 
 - ✅ User registration with email & password (via Supabase Auth)
-- 📇 Adds user info (first name, last name, phone, gender) to `profiles` table
 - ✅ CRUD Products (ProductName, ProductPrice, ProductImage) to `Products` table
 - 🔒 Authentication session management via **HTTP-only cookies**
 - 🚪 Secure sign in and sign out logic
@@ -24,6 +23,7 @@ A full-stack authentication app built using **Supabase**, **Express.js**, and **
 - Vite
 - Axios
 - Tailwind CSS
+- ShadCN
 
 **Backend:**
 - Express.js
@@ -44,21 +44,7 @@ A full-stack authentication app built using **Supabase**, **Express.js**, and **
 git clone https://github.com/perod122/supabase_CRUD.git
 cd your-project-name
 ```
-## Supabase Configuration
-- Create a project at www.supabase.com
-- Enable email/password auth
-- Create a `profiles` table:
-```sql
-create table profiles (
-  id uuid primary key references auth.users(id),
-  firstname text,
-  lastname text,
-  phone text,
-  gender text
-);
-```
-- Enable Row Level Security (RLS) and create a policy for reading/updating your own profile.
-  
+
 ## 👨‍💻 Author
 Made with 💙 by Perod122
 
