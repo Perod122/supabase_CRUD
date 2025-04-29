@@ -28,7 +28,7 @@ function Navbar() {
           {/* Logo */}
           <div className="flex-1 lg:flex-none">
             <div className="flex items-stretch">
-              <Link to="/home" className="hover:opacity-80 transition-opacity">
+            <Link to={user?.role === "admin" ? "/home" : "/user"} className="hover:opacity-80 transition-opacity">
                 <div className="flex items-center space-x-2">
                   <ShoppingBagIcon className="size-9 text-blue-400" />
                   <span className="font-semibold font-mono tracking-widest text-2xl bg-clip-text bg-gradient-to-r from-primary to-secondary">

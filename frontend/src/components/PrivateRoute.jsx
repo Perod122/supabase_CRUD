@@ -1,20 +1,30 @@
 // src/components/PrivateRoute.jsx
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import { fLogic } from "@/store/fLogic";
+import LoadingScreen from "./LoadingScreen";
 
-function PrivateRoute({ children }) {
+function PrivateRoute({ children, allowedRoles }) {
   const authenticated = useAuth();
+  const user = fLogic((state) => state.user);
 
-  if (authenticated === null){
-    return (
-      <div className="flex justify-center items-center h-64">
-      <div className="loading loading-spinner loading-lg"/>
-      </div>
-  )
-    
-  } 
-  if (!authenticated) return <Navigate to="/" replace />;
+  if (authenticated === null) {
+    return <LoadingScreen message="Loading Initialized...." />;
+  }
+
+  if (!allowedRoles.includes(user?.role)) {
+    // Logged in but role not allowed → redirect based on role
+    if (user?.role === "admin") {
+      return <Navigate to="/home" replace />;
+    } else if (user?.role === "user") {
+      return <Navigate to="/user" replace />;
+    } else {
+      return <Navigate to="/" replace />;
+    }
+  }
+
+  // All good
   return children;
 }
 

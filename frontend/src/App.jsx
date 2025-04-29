@@ -9,22 +9,49 @@ import Settings from "./pages/Settings";
 import Navbar from "./components/Navbar";
 import { useThemeStore } from "./store/useThemeStore";
 import ProductPage from "./pages/ProductPage";
+import UserPage from "./pages/UserPage";
 
 function App() {
   const {theme} = useThemeStore();
   return (
     <div className="min-h-screen bg-base-200 transition-colors duration-300" data-theme={theme}>
     
-      <Routes>
-        {/* Public pages */}
-        <Route path="/" element={<AuthRedirect><LoginPage /></AuthRedirect>} />
-        <Route path="/signup" element={<AuthRedirect><Register /></AuthRedirect>} />
+    <Routes>
+  {/* Public pages */}
+      <Route path="/" element={<AuthRedirect><LoginPage /></AuthRedirect>} />
+      <Route path="/signup" element={<AuthRedirect><Register /></AuthRedirect>} />
 
-        {/* Protected page */}
-        <Route path="/home" element={<PrivateRoute><Navbar /><Dashboard /></PrivateRoute>} />
-        <Route path="/settings" element={<PrivateRoute><Navbar /><Settings /></PrivateRoute>} />
-        <Route path="/product/:id" element={<PrivateRoute><Navbar /><ProductPage /></PrivateRoute>} />
-      </Routes>
+      {/* Admin-only pages */}
+      <Route path="/home" element={
+        <PrivateRoute allowedRoles={["admin"]}>
+          <Navbar />
+          <Dashboard />
+        </PrivateRoute>
+      } />
+      <Route path="/settings" element={
+        <PrivateRoute allowedRoles={["admin", "user"]}>
+          <Navbar />
+          <Settings />
+        </PrivateRoute>
+      } />
+
+      {/* Pages accessible by normal users */}
+      <Route path="/user" element={
+        <PrivateRoute allowedRoles={["user"]}>
+          <Navbar />
+          <UserPage />
+        </PrivateRoute>
+      } />
+
+      {/* Pages accessible by all authenticated users */}
+      <Route path="/product/:id" element={
+        <PrivateRoute allowedRoles={["admin"]}>
+          <Navbar />
+          <ProductPage />
+        </PrivateRoute>
+      } />
+    </Routes>
+
       <Toaster />
       </div>
   );
