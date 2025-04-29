@@ -1,10 +1,7 @@
-import { EditIcon, ShoppingBag, ShoppingCartIcon, Trash2Icon } from "lucide-react";
+import { ShoppingBag, ShoppingCartIcon } from "lucide-react";
 import { Link } from "react-router-dom";
-import DeleteConfirmationDialog from "./DeleteDialog";
-import { useProductStore } from "@/store/useProductStore";
 
 function ProductCardUser({ product }) {
-    const {deleteProduct} = useProductStore();
     return (
         <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300">
             <figure className="relative pt-[56.25%]">
@@ -16,12 +13,12 @@ function ProductCardUser({ product }) {
                     <p className="text-2xl font-bold">
                         ₱{Number(product.productPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
-                <div className="card-actions justify-end mt-4">
+                <div className="card-actions justify-between mt-4">
                     <Link to="" className="btn btn-sm btn-info btn-outline">
                         <ShoppingCartIcon className="size-4" />
                         Add to cart
                     </Link>
-                    <Link to="" className="btn btn-sm btn-info btn-outline">
+                    <Link to="" className="btn btn-sm btn-success btn-outline">
                         <ShoppingBag className="size-4" />
                         Buy now
                     </Link>

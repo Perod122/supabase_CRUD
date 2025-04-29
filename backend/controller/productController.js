@@ -95,3 +95,47 @@ export const updateProduct = async (req, res) => {
             res.status(500).json({success: false, message: "Error deleting a product"});
         }
  }
+ export const addToCart = async (req, res) => {
+    try {
+      const { product_id , quantity } = req.body;
+  
+      // Extract token from Authorization header
+      const access_token = req.cookies?.access_token;
+      if (!access_token) {
+        console.error("No token found in cookies");
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      }
+  
+      // Get user from Supabase using token
+      const { data: { user } } = await supabase.auth.getUser(access_token);
+  
+      if (!user) {
+        console.error("Not logged in or session invalid");
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      }
+      console.log("Adding to cart for user:", user.id);
+
+      const insertResult = await supabase
+        .from("cart")
+        .insert({
+            user_id: user.id,
+            product_id: product_id,
+            quantity: quantity || 1,
+        })
+        .select()
+        .single();
+        
+        if (insertResult.error) {
+        console.error("Insert error:", insertResult.error.message);
+        return res.status(500).json({ success: false, error: insertResult.error.message });
+        }
+
+        res.status(200).json({ success: true, data: insertResult.data });
+
+    } catch (err) {
+      console.error("Error in addToCart:", err.message);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  };
+  
+  
