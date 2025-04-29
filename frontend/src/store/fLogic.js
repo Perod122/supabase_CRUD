@@ -100,10 +100,14 @@ export const fLogic = create((set, get) => ({
       const { data } = await axios.post(`${BASE_URL}/api/products/signin`, { email, password }, {
         withCredentials: true,
       });
-
+      
       if (data.success) {
-        await get().fetchUser();
-        window.location.href = "/home";
+        if (data.user?.role === "admin"){
+          window.location.href = "/home";
+        }else{
+          window.location.href = "/user";
+        }
+        
       } else {
         toast.error(data.error || "Login failed");
       }

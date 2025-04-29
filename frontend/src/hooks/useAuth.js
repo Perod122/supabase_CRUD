@@ -1,15 +1,28 @@
+// hooks/useAuth.js
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { fLogic } from "@/store/fLogic";
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "";
 
 export default function useAuth() {
   const [authenticated, setAuthenticated] = useState(null);
+  const setUser = fLogic((state) => state.setUser); // assumes your store has this
 
   useEffect(() => {
-    axios.get(`${BASE_URL}/api/products/session`, { withCredentials: true })
-      .then(res => setAuthenticated(res.data.success))
-      .catch(() => setAuthenticated(false));
+    axios
+      .get(`${BASE_URL}/api/products/session`, { withCredentials: true })
+      .then(res => {
+        if (res.data.success && res.data.user) {
+          setUser(res.data.user); // store user with role in Zustand
+          setAuthenticated(true);
+        } else {
+          setAuthenticated(false);
+        }
+      })
+      .catch(() => {
+        setAuthenticated(false);
+      });
   }, []);
 
   return authenticated;

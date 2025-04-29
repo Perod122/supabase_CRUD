@@ -90,10 +90,24 @@ export const signIn = async (req, res) => {
     const access_token = data.session?.access_token;
     if (!access_token) throw new Error("No access token received");
 
-    // Use the cookie helper
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profileError) throw profileError;
+    if (!profile) throw new Error("User profile not found");
+
+    // Use the cookie helper  
     setAuthCookie(res, access_token);
 
-    res.status(200).json({ success: true, user: data.user });
+    res.status(200).json({ success: true, 
+      user: {
+      ...data.user,
+      role: profile.role
+    } 
+  });
   } catch (err) {
     res.status(500).json({ success: false, message: "Server error", error: err.message });
   }
@@ -136,7 +150,7 @@ export const signIn = async (req, res) => {
 
       return res.status(200).json({
          success: true, 
-         user, profile,
+         user:{role: profile.role}, profile,
             creds: {
                 email: user.email,
                 phone: user.phone,
