@@ -10,12 +10,12 @@ import Navbar from "./components/Navbar";
 import { useThemeStore } from "./store/useThemeStore";
 import ProductPage from "./pages/ProductPage";
 import UserPage from "./pages/UserPage";
+import CartPage from "./pages/CartPage";
 
 function App() {
   const {theme} = useThemeStore();
   return (
     <div className="min-h-screen bg-base-200 transition-colors duration-300" data-theme={theme}>
-    
     <Routes>
   {/* Public pages */}
       <Route path="/" element={<AuthRedirect><LoginPage /></AuthRedirect>} />
@@ -48,6 +48,13 @@ function App() {
         <PrivateRoute allowedRoles={["admin"]}>
           <Navbar />
           <ProductPage />
+        </PrivateRoute>
+      } />
+
+      <Route path="/mycart" element={
+        <PrivateRoute allowedRoles={["user"]}>
+          <Navbar />
+          <CartPage />
         </PrivateRoute>
       } />
     </Routes>

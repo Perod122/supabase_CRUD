@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "";
 export const useProductStore = create((set, get) => ({
     products: [],
+    cart: [],
     loading: false,
     error: null,
     currentProduct: null,
@@ -14,7 +15,12 @@ export const useProductStore = create((set, get) => ({
         productPrice: "",
         productImage: "",
     },
+    cartData: {
+        product_id: "",
+        quantity: "",
+    },
 
+    setCartData: (cartData) => set({cartData}),
     setFormData: (formData) => set ({formData}),
     resetForm: () => set({formData: {productName: "", productPrice: "", productImage: ""}}),
 
@@ -97,6 +103,52 @@ export const useProductStore = create((set, get) => ({
         }finally{
             set({loading: false})
         }
-    }
+    },
+    addToCart: async (e) => {
+        e.preventDefault();
+        set({ loading: true });
+    
+        try {
+            const { cartData } = get();
+    
+            await axios.post(
+                `${BASE_URL}/api/products/add-to-cart`,
+                {
+                    product_id: cartData.product_id,  // ✅ ensure this matches backend param
+                    quantity: parseInt(cartData.quantity) || 1,
+                },
+                {
+                    withCredentials: true, // 🔥 ensures cookie is sent
+                }
+            );
+    
+            toast.success("Added to cart successfully!");
+            set({ cartData: { product_id: "", quantity: "" } }); // reset cart form
+    
+        } catch (error) {
+            const errorMessage =
+                error?.response?.data?.message || "Failed to add to cart. Try again.";
+            toast.error(errorMessage);
+        } finally {
+            set({ loading: false });
+        }
+    },
+    fetchUserCart: async () => {
+        set({loading: true});
+        try {
+            const response = await axios.get(`${BASE_URL}/api/products/mycart`, {
+                withCredentials: true,
+                })
+            set({cart : response.data.data, error: null});
+        } catch (error) {
+            const errorMessage =
+                error?.response?.data?.message || "Failed to fetch user cart";
+            toast.error(errorMessage);
+            set({error: errorMessage, cart: []});
+        }finally {
+            set({loading: false})
+        }
+    },
+  
 }
 ));
