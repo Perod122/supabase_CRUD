@@ -3,13 +3,16 @@ import { Link } from 'react-router-dom';
 import { LogOutIcon, LucideTabletSmartphone, SettingsIcon, ShoppingBagIcon, ShoppingCartIcon, User2Icon, UserIcon } from "lucide-react";
 import { fLogic } from '../store/fLogic';
 import ThemeSelector from './ThemeSelector';
+import { useProductStore } from '@/store/useProductStore';
+
 
 function Navbar() {
   const handleSignOut = fLogic((state) => state.handleSignOut);
   const fetchUser = fLogic((state) => state.fetchUser);
   const user = fLogic((state) => state.user);
-
+  const {cart} = useProductStore();
   const creds = fLogic((state) => state.creds);
+
   const getInitials = () => {
     if (!user?.firstname && !user?.lastname) return '?';
     const firstInitial = user?.firstname ? user.firstname.charAt(0).toUpperCase() : '';
@@ -18,9 +21,10 @@ function Navbar() {
   };
   
   useEffect(() => {
-    fetchUser();
+    fetchUser(); 
   }, [fetchUser]);
   
+
   return (
     <div className="bg-base-100/80 backdrop-blur-lg border-b border-base-content/10 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto">
@@ -42,11 +46,21 @@ function Navbar() {
           {/* Right Section */}
           <div className="flex items-center gap-4">
           {user?.role !== "admin" && (
+            <div className="indicator">
             <Link to="/mycart">
-            <button tabIndex={0} className="btn btn-ghost btn-circle" title="My Cart">
-              <ShoppingCartIcon className="size-5" />
-            </button>
+              <button
+                tabIndex={0}
+                className="btn btn-ghost btn-circle relative"
+                title="My Cart"
+              >
+                <ShoppingCartIcon className="size-5" />
+                <span className="badge badge-sm badge-primary absolute top-2 right-0 translate-x-1/2 -translate-y-1/2">
+                  {cart.length}
+                </span>
+              </button>
             </Link>
+          </div>
+          
           )}
             <ThemeSelector />
               <div className="dropdown dropdown-end">

@@ -137,90 +137,59 @@ export const updateProduct = async (req, res) => {
       res.status(500).json({ success: false, message: "Server error" });
     }
   };
-  export const fetchUserCart = async  (req, res) => {
+  export const fetchUserCart = async (req, res) => {
     try {
-        const access_token = req.cookies?.access_token;
-        if (!access_token) {
-            return res.status(401).json({ success: false, message: "Unauthorized" });
-          }
-        
-        const { data: {user}, error: userError } = await supabase.auth.getUser(access_token)
-        if(userError) throw userError;
-        if(!user){
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
-
-
-        // Fetch all cart items for the current user
-        const { data: cartData, error: cartError } = await supabase
+      const access_token = req.cookies?.access_token;
+      if (!access_token) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      }
+  
+      // Authenticate user
+      const { data: { user }, error: userError } = await supabase.auth.getUser(access_token);
+      if (userError) throw userError;
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+  
+      // Fetch user's cart items
+      const { data: cartData, error: cartError } = await supabase
         .from("cart")
         .select("*")
         .eq("user_id", user.id);
-
-        if (cartError) throw cartError;
-
-        // Now fetch the product details for each item in parallel using Promise.all
-        const productPromises = cartData.map(async (item) => {
-        const { data: productData, error: productError } = await supabase
-        .from("Products")
-        .select("*")
-        .eq("id", item.product_id) // use item.product_id instead of item.id
-        .single(); // assuming product ID is unique
-
-        if (productError) throw productError;
-
-
-
-        return {
-        ...productData,
-        quantity: item.quantity, // include quantity from cart if needed
-        cart_id: item.id         // include cart item ID for later reference
-        };
-        });
-
-        const productArr = await Promise.all(productPromises);
-
-        // This returns  me an array of items(objcects) with ids
-        // const {data: cartData, error: cartError } = await supabase
-        // .from("cart")
-        // .select("*")
-        // .eq("user_id", user.id);
-        
-        // if(cartError) throw cartError;
-        // console.log(cartData)
-
-        // // Now i need to go through the products tables for each item, and get the item
-        // // and push to the product array
-
-        // const productArr = []
-        // cartData.map(async (item) => {
-        //     const {data: productData, error: productError } = await supabase
-        //     .from("Products")
-        //     .select("*")
-        //     .eq("id", item.id);
-        //     console.log(item)
-        //     if(productError) throw productError;
-        //     else productArr.push(productData)
-
-        // })
-
-        // console.log(`product array: ${productArr}`)
-        
-
-        // // const {data: productData, error: productError } = await supabase
-        // // .from("Products")
-        // // .select("*")
-        // // .eq("id", cartData[0].id);
-        
-        // // if(productError) throw productError;
-        
-        // // console.log("Product Cart fetched success:", productData);
-
-        // // return res.status(200).json({ success: true, message: "Users Cart Fetch Successfully", data: productData });
-        return res.status(200).json({ success: true, message: "Users Cart Fetch Successfully", data: productArr });
-    } catch (error) {
-        
-    }
-  }
   
+      if (cartError) throw cartError;
+  
+      // Fetch associated products in parallel
+      const productPromises = cartData.map(async (item) => {
+        const { data: productData, error: productError } = await supabase
+          .from("Products")
+          .select("*")
+          .eq("id", item.product_id)
+          .single();
+  
+        if (productError) throw productError;
+  
+        return {
+          ...productData,
+          quantity: item.quantity,
+          cart_id: item.id,
+        };
+      });
+  
+      const productArr = await Promise.all(productPromises);
+  
+      return res.status(200).json({
+        success: true,
+        message: "User's cart fetched successfully",
+        data: productArr,
+      });
+    } catch (error) {
+      console.error("Error fetching user cart:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch user cart",
+        error: error.message,
+      });
+    }
+  };
   

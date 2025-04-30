@@ -4,6 +4,7 @@ import { useProductStore } from "@/store/useProductStore";
 
 function ProductCardUser({ product }) {
     const setCartData = useProductStore((state) => state.setCartData);
+    const fetchUserCart = useProductStore((state) => state.fetchUserCart);
     const addToCart = useProductStore((state) => state.addToCart);
 
     const handleAddToCart = (e) => {
@@ -13,6 +14,7 @@ function ProductCardUser({ product }) {
             quantity: 1,             // default quantity
         });
         addToCart(e);
+        fetchUserCart();
     };
 
     return (

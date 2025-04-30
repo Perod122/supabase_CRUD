@@ -107,32 +107,36 @@ export const useProductStore = create((set, get) => ({
     addToCart: async (e) => {
         e.preventDefault();
         set({ loading: true });
-    
+      
         try {
-            const { cartData } = get();
-    
-            await axios.post(
-                `${BASE_URL}/api/products/add-to-cart`,
-                {
-                    product_id: cartData.product_id,  // ✅ ensure this matches backend param
-                    quantity: parseInt(cartData.quantity) || 1,
-                },
-                {
-                    withCredentials: true, // 🔥 ensures cookie is sent
-                }
-            );
-    
-            toast.success("Added to cart successfully!");
-            set({ cartData: { product_id: "", quantity: "" } }); // reset cart form
-    
+          const { cartData } = get();
+      
+          await axios.post(
+            `${BASE_URL}/api/products/add-to-cart`,
+            {
+              product_id: cartData.product_id,
+              quantity: parseInt(cartData.quantity) || 1,
+            },
+            { withCredentials: true }
+          );
+      
+          toast.success("Added to cart successfully!");
+      
+          set({ cartData: { product_id: "", quantity: "" } });
+      
+          // ✅ Fetch fresh cart data from DB
+          await get().fetchUserCart(); 
+      
         } catch (error) {
-            const errorMessage =
-                error?.response?.data?.message || "Failed to add to cart. Try again.";
-            toast.error(errorMessage);
+          const errorMessage =
+            error?.response?.data?.message || "Failed to add to cart. Try again.";
+          toast.error(errorMessage);
         } finally {
-            set({ loading: false });
+          set({ loading: false });
         }
-    },
+      },
+      
+    
     fetchUserCart: async () => {
         set({loading: true});
         try {
