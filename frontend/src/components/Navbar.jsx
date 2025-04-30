@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOutIcon, LucideTabletSmartphone, SettingsIcon, ShoppingBagIcon, User2Icon, UserIcon } from "lucide-react";
+import { LogOutIcon, LucideTabletSmartphone, SettingsIcon, ShoppingBagIcon, ShoppingCartIcon, User2Icon, UserIcon } from "lucide-react";
 import { fLogic } from '../store/fLogic';
 import ThemeSelector from './ThemeSelector';
 
@@ -41,9 +41,16 @@ function Navbar() {
 
           {/* Right Section */}
           <div className="flex items-center gap-4">
+          {user?.role !== "admin" && (
+            <Link to="/mycart">
+            <button tabIndex={0} className="btn btn-ghost btn-circle" title="My Cart">
+              <ShoppingCartIcon className="size-5" />
+            </button>
+            </Link>
+          )}
             <ThemeSelector />
               <div className="dropdown dropdown-end">
-                <button className="btn btn-ghost btn-circle">
+                <button className="btn btn-ghost btn-circle" title="Select Theme">
                   <div className="flex items-center justify-center border border-base-content size-8 rounded-full bg-base-200 text-base-content font-medium">
                           {getInitials()}
                         </div>
