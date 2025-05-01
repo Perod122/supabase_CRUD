@@ -7,7 +7,8 @@ A full-stack authentication app built using **Supabase**, **Express.js**, and **
 ## 🚀 Features
 
 - ✅ User registration with email & password (via Supabase Auth)
-- ✅ CRUD Products (ProductName, ProductPrice, ProductImage) to `Products` table
+- ✅ CRUD Products
+- 🔒 Role Base Routing / Login (User/Admin)
 - 🔒 Authentication session management via **HTTP-only cookies**
 - 🚪 Secure sign in and sign out logic
 - 👤 Check session and auto-fetch user info on page load
