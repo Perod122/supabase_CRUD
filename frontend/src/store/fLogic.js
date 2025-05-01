@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useProductStore } from './useProductStore';
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : ""
 
@@ -28,13 +29,14 @@ export const fLogic = create((set, get) => ({
   setPassword: (password) => set({ password }),
   setLoading: (loading) => set({ loading }),
 
+  
   // Fetch current session user
   fetchUser: async () => {
     try {
       const { data } = await axios.get(`${BASE_URL}/api/products/session`, {
         withCredentials: true,
       });
-
+      
       if (data.success) {
         set({ user: data.profile });
         set({ creds: data.creds });

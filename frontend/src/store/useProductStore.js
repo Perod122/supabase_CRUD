@@ -147,7 +147,6 @@ export const useProductStore = create((set, get) => ({
         } catch (error) {
             const errorMessage =
                 error?.response?.data?.message || "Failed to fetch user cart";
-            toast.error(errorMessage);
             set({error: errorMessage, cart: []});
         }finally {
             set({loading: false})

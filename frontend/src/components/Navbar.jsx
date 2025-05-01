@@ -35,7 +35,7 @@ function Navbar() {
             <Link to={user?.role === "admin" ? "/home" : "/user"} className="hover:opacity-80 transition-opacity">
                 <div className="flex items-center space-x-2">
                   <ShoppingBagIcon className="size-9 text-blue-400" />
-                  <span className="font-semibold font-mono tracking-widest text-2xl bg-clip-text bg-gradient-to-r from-primary to-secondary">
+                  <span className="hidden sm:inline font-semibold font-mono tracking-widest text-2xl bg-clip-text bg-gradient-to-r from-primary to-secondary">
                     Shopperod
                   </span>
                 </div>
@@ -54,9 +54,11 @@ function Navbar() {
                 title="My Cart"
               >
                 <ShoppingCartIcon className="size-5" />
+                { cart.length > 0 && (
                 <span className="badge badge-sm badge-primary absolute top-2 right-0 translate-x-1/2 -translate-y-1/2">
                   {cart.length}
                 </span>
+                )} 
               </button>
             </Link>
           </div>

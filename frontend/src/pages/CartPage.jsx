@@ -14,8 +14,7 @@ function CartPage() {
         <div>
           {cart.map((item) => {
             return (
-              
-              <div key={item.id}>
+              <div key={item.cart_id}>
                 {item.productName}
                 <br />
                 {item.productPrice}
