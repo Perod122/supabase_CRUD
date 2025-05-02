@@ -1,5 +1,5 @@
 import express from "express";
-import { updateProduct, createProduct, getProducts, getProductById, deleteProduct, addToCart, fetchUserCart } from "../controller/productController.js";
+import { updateProduct, createProduct, getProducts, getProductById, deleteProduct, addToCart, fetchUserCart, deleteUserCart } from "../controller/productController.js";
 import { signUp, signIn, signOut, checkSession as checkSessionHandler, updateProfile } from "../controller/authController.js";
 import checkSession from "../middleware/checkSession.js"; // This stays as is
 
@@ -8,6 +8,7 @@ router.get("/session", checkSession, checkSessionHandler);
 // Products
 router.get("/", checkSession, getProducts);
 router.get("/mycart", checkSession, fetchUserCart)
+router.delete("/mycart/:id", checkSession, deleteUserCart)
 router.put("/profile", checkSession, updateProfile);
 router.post("/create", checkSession, createProduct);
 router.get("/:id", checkSession, getProductById); // dynamic route should be at the bottom

@@ -35,6 +35,7 @@ function ProductCardUser({ product }) {
                         maximumFractionDigits: 2,
                     })}
                 </p>
+                <p>Stocks: {product.stock}</p>
                 <div className="card-actions justify-between mt-4">
                     <button
                         onClick={handleAddToCart}

@@ -152,6 +152,35 @@ export const useProductStore = create((set, get) => ({
             set({loading: false})
         }
     },
-  
+    deleteUserCart: async (cart_id) => {
+        set({ loading: true });
+        try {
+            
+            const response = await axios.delete(`${BASE_URL}/api/products/mycart/${cart_id}`, {
+                withCredentials: true,
+            });
+            get().fetchUserCart();
+            if (response.data.success) {
+                
+                set(prev => ({
+                    cart: prev.cart.filter(item => item.cart_id === cart_id)
+                }));
+                
+                toast.success("Item removed from cart");
+            } else {
+                throw new Error(response.data.message || "Failed to delete item");
+            }
+        } catch (error) {
+            console.error("Error deleting cart item:", error);
+            if (error.response?.status === 404) {
+                toast.error("Item not found in your cart");
+                // Optional: Refresh cart to sync with server
+            } else {
+                toast.error(error.response?.data?.message || "Failed to remove item");
+            }
+        } finally {
+            set({ loading: false });
+        }
+    },
 }
 ));
