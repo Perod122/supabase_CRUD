@@ -95,6 +95,45 @@ export const updateProduct = async (req, res) => {
             res.status(500).json({success: false, message: "Error deleting a product"});
         }
  }
+ export const deleteUserCart = async (req, res) => {
+  const { id } = req.params;
+  const access_token = req.cookies?.access_token;
+
+  try {
+    // 1. Verify user authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser(access_token);
+    if (authError) throw authError;
+    if (!user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    // 2. Verify the cart item exists and belongs to this user
+    const { data: cartItem, error: findError } = await supabase
+      .from("cart")  // Note: lowercase table name
+      .select("*")
+      .eq("id", id)  // Match the UUID
+      .eq("user_id", user.id)  // Verify ownership
+      .single();
+      
+    if (findError || !cartItem) {
+      console.log("Cart item not found or doesn't belong to user", { id, userId: user.id });
+      return res.status(404).json({ success: false, message: "Cart item not found" });
+    }
+
+    // 3. Delete the item
+    const { error: deleteError } = await supabase
+      .from("cart")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) throw deleteError;
+    
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Failed to delete cart item:", error);
+    res.status(500).json({ success: false, message: "Error deleting cart item" });
+  }
+}
  export const addToCart = async (req, res) => {
     try {
       const { product_id , quantity } = req.body;
@@ -155,7 +194,8 @@ export const updateProduct = async (req, res) => {
       const { data: cartData, error: cartError } = await supabase
         .from("cart")
         .select("*")
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .order('created_at', { ascending: false }); 
   
       if (cartError) throw cartError;
   
@@ -173,6 +213,7 @@ export const updateProduct = async (req, res) => {
           ...productData,
           quantity: item.quantity,
           cart_id: item.id,
+          created_at: item.created_at
         };
       });
   
