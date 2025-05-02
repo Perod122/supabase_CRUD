@@ -182,5 +182,7 @@ export const useProductStore = create((set, get) => ({
             set({ loading: false });
         }
     },
+    clearCart: () => set({ cart: [] }),
+
 }
 ));

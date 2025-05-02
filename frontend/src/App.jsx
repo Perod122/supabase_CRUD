@@ -11,17 +11,22 @@ import { useThemeStore } from "./store/useThemeStore";
 import ProductPage from "./pages/ProductPage";
 import UserPage from "./pages/UserPage";
 import CartPage from "./pages/CartPage";
-import { fLogic } from "./store/fLogic";
 import { useProductStore } from "./store/useProductStore";
 import { useEffect } from "react";
+import { fLogic } from "./store/fLogic";
+
 function App() {
   const {theme} = useThemeStore();
   const fetchUserCart = useProductStore((state) => state.fetchUserCart);
-  const creds = fLogic((state) => state.creds);
-  
+  const {fetchProducts} = useProductStore();
   useEffect(() => {
       fetchUserCart(); // fetch cart only if user is present
   }, [fetchUserCart]);
+
+  useEffect(() => {
+      fetchProducts(); // fetch products only if user is present
+  }, [fetchProducts]);
+  
   return (
     <div className="min-h-screen bg-base-200 transition-colors duration-300" data-theme={theme}>
     <Routes>

@@ -1,23 +1,48 @@
 import DeleteConfirmationDialog from '@/components/DeleteDialog';
 import { useProductStore } from '@/store/useProductStore';
-import { ArrowLeftIcon, ShoppingBag, Trash2, Plus, Minus, Trash2Icon } from 'lucide-react';
-import React, { useEffect } from 'react';
+import { ArrowLeftIcon, ShoppingBag, Plus, Minus, Trash2Icon } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOrderStore } from '@/store/useOrder';
+import { toast } from 'react-hot-toast';
 
 function CartPage() {
   const navigate = useNavigate();
-  const { cart, loading, error, fetchUserCart, deleteUserCart } = useProductStore();
+  const { cart, loading, error, fetchUserCart, deleteUserCart, clearCart } = useProductStore();
+  const { placeOrder, loading: placingOrder } = useOrderStore();
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('COD');
+
+  const handlePlaceOrder = async () => {
+    if (!deliveryAddress.trim()) {
+      toast.error("Please enter delivery address");
+      return;
+    }
+
+    try {
+      const order = await placeOrder({ 
+        cart,
+        paymentMethod, 
+        deliveryAddress 
+      });
+      
+      if (order) {
+        clearCart();
+        toast.success("Order placed successfully!");
+        navigate(`/mycart`);
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to place order");
+    }
+  };
 
   useEffect(() => {
     fetchUserCart();
   }, [fetchUserCart]);
 
-  // Sort cart items by newest first (assuming cart_id is auto-incrementing)
   const sortedCart = [...cart].sort((a, b) => b.cart_id - a.cart_id);
-
-  // Calculate prices
   const subtotal = sortedCart.reduce((sum, item) => sum + (item.productPrice * (item.quantity || 1)), 0);
-  const shippingFee = subtotal > 500 ? 0 : 50; // Free shipping over ₱500
+  const shippingFee = subtotal > 500 ? 0 : 50;
   const total = subtotal + shippingFee;
 
   return (
@@ -41,11 +66,11 @@ function CartPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 container mx-auto px-4 py-4 max-w-4xl flex flex-col lg:flex-row gap-6 pb-20 lg:pb-4 ">
+      <div className="flex-1 container mx-auto px-4 py-4 max-w-4xl flex flex-col lg:flex-row gap-6 pb-20 lg:pb-4">
         {loading ? (
-            <div className="flex justify-center items-center h-64">
-            <div className="loading loading-spinner loading-lg"/>
-            </div>
+          <div className="flex justify-center items-center h-64">
+            <span className="loading loading-spinner loading-lg"></span>
+          </div>
         ) : error ? (
           <div className="alert alert-error shadow-lg">
             <div>
@@ -69,9 +94,9 @@ function CartPage() {
           </div>
         ) : (
           <>
-            {/* Cart Items - Scrollable */}
+            {/* Cart Items */}
             <div className="flex-1 lg:max-h-[calc(100vh-180px)] lg:overflow-y-auto lg:pr-2">
-              <div className="bg-base-100  shadow-sm p-4 border border-base-300 rounded-xl">
+              <div className="bg-base-100 shadow-sm p-4 border border-base-300 rounded-xl">
                 <div className="space-y-4">
                   {sortedCart.map((item) => (
                     <div
@@ -88,7 +113,6 @@ function CartPage() {
                         <h2 className="text-lg font-semibold truncate">{item.productName}</h2>
                         <p className="text-base-content font-bold">₱{item.productPrice.toFixed(2)}</p>
                         
-                        {/* Quantity controls */}
                         <div className="flex items-center mt-2 gap-2">
                           <button className="btn btn-xs btn-circle btn-ghost">
                             <Minus className="size-4" />
@@ -100,19 +124,19 @@ function CartPage() {
                         </div>
                       </div>
                       <DeleteConfirmationDialog
-                          onConfirm={() => deleteUserCart(item.cart_id)}
-                          trigger={
-                              <button 
-                                  className="btn btn-sm btn-error btn-outline"
-                                  disabled={loading} // Disable during deletion
-                              >
-                                  {loading ? (
-                                      <span className="loading loading-spinner loading-xs"></span>
-                                  ) : (
-                                      <Trash2Icon className="size-4" />
-                                  )}
-                              </button>
-                          }
+                        onConfirm={() => deleteUserCart(item.cart_id)}
+                        trigger={
+                          <button 
+                            className="btn btn-sm btn-error btn-outline"
+                            disabled={loading}
+                          >
+                            {loading ? (
+                              <span className="loading loading-spinner loading-xs"></span>
+                            ) : (
+                              <Trash2Icon className="size-4" />
+                            )}
+                          </button>
+                        }
                       />
                     </div>
                   ))}
@@ -120,7 +144,7 @@ function CartPage() {
               </div>
             </div>
 
-            {/* Order Summary - Hidden on mobile, shown on desktop */}
+            {/* Order Summary */}
             <div className="hidden lg:block lg:w-80">
               <div className="bg-base-100 rounded-xl shadow-sm p-6 sticky top-24 border border-base-300">
                 <h2 className="text-xl font-bold mb-4">Order Summary</h2>
@@ -147,10 +171,40 @@ function CartPage() {
                   </div>
                 </div>
 
-                <button className="btn btn-primary w-full">
-                  <ShoppingBag className="size-5 mr-2" />
-                  Proceed to Checkout
-                </button>
+                <div className="space-y-4">
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="select select-bordered w-full"
+                  >
+                    <option value="COD">Cash on Delivery</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="PayPal">PayPal</option>
+                  </select>
+
+                  <textarea
+                    placeholder="Delivery Address"
+                    value={deliveryAddress}
+                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                    className="textarea textarea-bordered w-full"
+                    rows={3}
+                  />
+
+                  <button 
+                    className="btn btn-primary w-full" 
+                    onClick={handlePlaceOrder}
+                    disabled={placingOrder || !deliveryAddress.trim()}
+                  >
+                    {placingOrder ? (
+                      <span className="loading loading-spinner loading-sm"></span>
+                    ) : (
+                      <>
+                        <ShoppingBag className="size-5 mr-2" />
+                        Place Order
+                      </>
+                    )}
+                  </button>
+                </div>
                 
                 {subtotal < 500 && (
                   <div className="mt-4 text-sm text-center text-gray-500">
@@ -163,7 +217,7 @@ function CartPage() {
         )}
       </div>
 
-      {/* Sticky Order Summary for Mobile - Hidden on desktop */}
+      {/* Mobile Checkout */}
       {sortedCart.length > 0 && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-base-100 border-t border-base-300 shadow-lg p-4">
           <div className="flex justify-between items-center">
@@ -173,13 +227,63 @@ function CartPage() {
                 {shippingFee === 0 ? 'Free shipping' : `+₱${shippingFee.toFixed(2)} shipping`}
               </div>
             </div>
-            <button className="btn btn-primary flex-1 max-w-[200px]">
+            <button 
+              className="btn btn-primary flex-1 max-w-[200px]"
+              onClick={() => {
+                document.getElementById('mobile_checkout_modal').showModal();
+              }}
+            >
               <ShoppingBag className="size-5 mr-2" />
               Checkout
             </button>
           </div>
         </div>
       )}
+
+      {/* Mobile Checkout Modal */}
+      <dialog id="mobile_checkout_modal" className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Complete Your Order</h3>
+          
+          <div className="space-y-4 mt-4">
+            <select
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="select select-bordered w-full"
+            >
+              <option value="COD">Cash on Delivery</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="PayPal">PayPal</option>
+            </select>
+
+            <textarea
+              placeholder="Delivery Address"
+              value={deliveryAddress}
+              onChange={(e) => setDeliveryAddress(e.target.value)}
+              className="textarea textarea-bordered w-full"
+              rows={3}
+            />
+
+            <button 
+              className="btn btn-primary w-full" 
+              onClick={() => {
+                handlePlaceOrder();
+                document.getElementById('mobile_checkout_modal').close();
+              }}
+              disabled={placingOrder || !deliveryAddress.trim()}
+            >
+              {placingOrder ? (
+                <span className="loading loading-spinner loading-sm"></span>
+              ) : (
+                'Place Order'
+              )}
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
     </div>
   );
 }
