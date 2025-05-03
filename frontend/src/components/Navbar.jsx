@@ -85,7 +85,7 @@ function Navbar() {
               </Link>
           )}
               <div className="dropdown dropdown-end">
-                <button className="btn btn-ghost btn-circle" title="Select Theme">
+                <button className="btn btn-ghost btn-circle" title="My Profile">
                   <div className="flex items-center justify-center border border-base-content size-8 rounded-full bg-base-200 text-base-content font-medium">
                           {getInitials()}
                         </div>

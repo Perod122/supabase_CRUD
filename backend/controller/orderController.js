@@ -164,7 +164,7 @@ async function createOrder(userId, paymentMethod, deliveryAddress) {
       owner_id: userId,
       payment_method: paymentMethod,
       delivery_address: deliveryAddress,
-      status: 'pending',
+      status: 'For Delivery',
     })
     .select()
     .single();
