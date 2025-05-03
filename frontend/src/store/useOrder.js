@@ -8,7 +8,8 @@ export const useOrderStore = create((set) => ({
   loading: false,
   error: null,
   order: null,
-
+  UserOrder: [],
+  clearOrder: () => set({ order: null, error: null }),
   placeOrder: async ({ cart, paymentMethod, deliveryAddress }) => {
     try {
       set({ loading: true, error: null, order: null });
@@ -32,5 +33,22 @@ export const useOrderStore = create((set) => ({
       set({ loading: false });
     }
   },
-  clearOrder: () => set({ order: null, error: null })
+  getUserOrders: async () => {
+    set({ loading: true });
+    try {
+      const { data } = await axios.get(`${BASE_URL}/api/products/myorders`, { withCredentials: true });
+      if (data.success) {
+        set({ UserOrder: data.data });
+      }else {
+        throw new Error(data.message || "Failed to fetch orders");
+      }
+
+    } catch (error) {
+      set({ error: error.response?.data?.message || error.message });
+      toast.error(error.response?.data?.message || "Failed to fetch orders");
+      return null;
+    } finally {
+      set({ loading: false });
+    }
+  }
 }));

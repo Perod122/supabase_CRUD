@@ -80,20 +80,41 @@ export const getUserOrders = async (req, res) => {
     if (!user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-    const { data: orders, error } = await supabase
+
+    // Step 1: Fetch user's orders
+    const { data: orders, error: ordersError } = await supabase
       .from('orders')
       .select('*')
-      .eq('owner_id', user.id)
+      .eq('owner_id', user.id);
 
-       // Log user ID for debugging
-    if (error) throw error;
-    
-    if(!orders || orders.length === 0) {
+    if (ordersError) throw ordersError;
+    if (!orders || orders.length === 0) {
       return res.status(404).json({ success: false, message: "No orders found" });
     }
+
+    // Step 2: Fetch order_items and products for each order
+    const detailedOrders = await Promise.all(
+      orders.map(async (order) => {
+        // Get order_items for this order
+        const { data: items, error: itemsError } = await supabase
+          .from('order_items')
+          .select('*, product:product_id(*)') // Join with products via foreign key
+          .eq('order_id', order.order_id);
+
+        if (itemsError) throw itemsError;
+
+        return {
+          ...order,
+          items,
+        };
+      })
+    );
+
+    console.log("User orders fetched successfully:", detailedOrders);
+    // Step 3: Return structured order with items and product info
     return res.status(200).json({
       success: true,
-      orders,
+      data: detailedOrders,
       message: "Orders fetched successfully"
     });
   } catch (error) {
@@ -103,6 +124,7 @@ export const getUserOrders = async (req, res) => {
     });
   }
 };
+
 /**
  * Authenticate user based on access token
  * @param {string} access_token - User access token

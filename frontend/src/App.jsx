@@ -14,6 +14,7 @@ import CartPage from "./pages/CartPage";
 import { useProductStore } from "./store/useProductStore";
 import { useEffect } from "react";
 import { fLogic } from "./store/fLogic";
+import UserOrder from "./pages/UserOrder";
 
 function App() {
   const {theme} = useThemeStore();
@@ -70,6 +71,13 @@ function App() {
           <CartPage />
         </PrivateRoute>
       } />
+
+    <Route path="/myorders" element={
+            <PrivateRoute allowedRoles={["user"]}>
+              <Navbar />
+              <UserOrder />
+            </PrivateRoute>
+          } />
     </Routes>
 
       <Toaster />

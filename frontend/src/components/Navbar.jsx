@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOutIcon, NotepadText, SettingsIcon, ShoppingBagIcon, ShoppingCartIcon, User2Icon, } from "lucide-react";
+import { LogOutIcon, NotebookPen, NotepadText, SettingsIcon, ShoppingBagIcon, ShoppingCartIcon, User2Icon, } from "lucide-react";
 import { fLogic } from '../store/fLogic';
 import ThemeSelector from './ThemeSelector';
 import { useProductStore } from '@/store/useProductStore';
@@ -46,6 +46,16 @@ function Navbar() {
           {/* Right Section */}
           <div className="flex items-center gap-2">
           {user?.role !== "admin" ? (
+            <>
+            <Link to="/myorders">
+              <button
+                tabIndex={0}
+                className="btn btn-ghost btn-circle relative"
+                title="My Orders"
+              >
+                <NotebookPen className="size-5" />
+              </button>
+            </Link>
             <div className="indicator">
             <Link to="/mycart">
               <button
@@ -62,7 +72,7 @@ function Navbar() {
               </button>
             </Link>
           </div>
-          
+          </>
           ) : (
             <Link to="/orders">
               <button
