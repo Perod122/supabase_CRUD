@@ -45,7 +45,64 @@ export const placeOrder = async (req, res) => {
     });
   }
 };
+export const getAllOrders = async (req, res) => {
+  try {
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false }); // Fetch orders in descending order
 
+      if (error) throw error;
+
+      if(!orders || orders.length === 0) {
+        return res.status(404).json({ success: false, message: "No orders found" });
+      }
+
+    return res.status(200).json({
+      success: true,
+      orders,
+      message: "Orders fetched successfully"
+    });
+  } catch (error) {
+    console.error("Error fetching orders:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+      error: error.message,
+    });
+  }
+
+}
+export const getUserOrders = async (req, res) => {
+  try {
+    const access_token = req.cookies?.access_token;
+    const user = await authenticateUser(access_token);
+    if (!user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('owner_id', user.id)
+
+       // Log user ID for debugging
+    if (error) throw error;
+    
+    if(!orders || orders.length === 0) {
+      return res.status(404).json({ success: false, message: "No orders found" });
+    }
+    return res.status(200).json({
+      success: true,
+      orders,
+      message: "Orders fetched successfully"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch orders"
+    });
+  }
+};
 /**
  * Authenticate user based on access token
  * @param {string} access_token - User access token

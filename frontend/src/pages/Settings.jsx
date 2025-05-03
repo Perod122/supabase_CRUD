@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon, Edit2Icon, SaveIcon, XIcon } from 'lucide-react';
 import { fLogic } from '../store/fLogic'; // adjust path if needed
+import ThemeSelector from '@/components/ThemeSelector';
 
 function Settings() {
   const navigate = useNavigate();
@@ -28,8 +29,10 @@ function Settings() {
 
       <div className="card bg-base-100 shadow-lg">
         <div className="card-body">
+          <div className="flex items-center justify-between">
           <h1 className="card-title text-2xl mb-6">Settings</h1>
-
+          <ThemeSelector/>
+          </div>
           <form 
             className="space-y-6"
             onSubmit={(e) => {

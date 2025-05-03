@@ -18,7 +18,7 @@ export const getProducts = async (req, res) => {
 export const createProduct = async (req, res) => {
     const { productName, productPrice, productImage } = req.body;
 
-    if (!productName || !productPrice || !productImage) {
+    if (!validateRequiredFields(productName, productPrice, productImage)) {
         return res.status(400).json({ success: false, message: "Please provide all fields" });
     }
 
@@ -61,9 +61,9 @@ export const updateProduct = async (req, res) => {
     const { id } = req.params;
     const { productName, productPrice, productImage } = req.body;
 
-    if (!productName || !productPrice || !productImage) {
-        return res.status(400).json({ success: false, message: "Please provide all fields" });
-    }
+    if (!validateRequiredFields(productName, productPrice, productImage)) {
+      return res.status(400).json({ success: false, message: "Please provide all fields" });
+  }
 
     try {
         const { data: updatedProduct, error } = await supabase
@@ -233,4 +233,8 @@ export const updateProduct = async (req, res) => {
       });
     }
   };
+
+  function validateRequiredFields(productName, productPrice, productImage) {
+    return Boolean(productName && productPrice && productImage);
+  }
   

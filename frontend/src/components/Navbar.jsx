@@ -74,7 +74,6 @@ function Navbar() {
               </button>
               </Link>
           )}
-            <ThemeSelector />
               <div className="dropdown dropdown-end">
                 <button className="btn btn-ghost btn-circle" title="Select Theme">
                   <div className="flex items-center justify-center border border-base-content size-8 rounded-full bg-base-200 text-base-content font-medium">

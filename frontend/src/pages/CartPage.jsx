@@ -51,14 +51,15 @@ function CartPage() {
       <div className="bg-base-100 border-b border-base-300 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center">
-            <button 
-              className="btn btn-ghost hover:bg-base-200 rounded-full p-2"
+            <button
+              title='Go back'
+              className="btn sm:ml-56 btn-ghost hover:bg-base-200 rounded-full p-2"
               onClick={() => navigate(-1)}
             >
               <ArrowLeftIcon className="size-5" />
             </button>
             <h1 className="text-xl font-bold ml-2">My Shopping Cart</h1>
-            <div className="badge badge-primary ml-auto">
+            <div className="badge badge-primary sm:mr-48 ml-auto">
               {sortedCart.length} {sortedCart.length === 1 ? 'item' : 'items'}
             </div>
           </div>
@@ -253,7 +254,7 @@ function CartPage() {
             >
               <option value="COD">Cash on Delivery</option>
               <option value="Credit Card">Credit Card</option>
-              <option value="PayPal">PayPal</option>
+              <option value="GCash">GCash</option>
             </select>
 
             <textarea
