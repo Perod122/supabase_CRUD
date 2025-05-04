@@ -15,6 +15,7 @@ import { useProductStore } from "./store/useProductStore";
 import { useEffect } from "react";
 import { fLogic } from "./store/fLogic";
 import UserOrder from "./pages/UserOrder";
+import OrderPageAdmin from "./pages/OrderPageAdmin";
 
 function App() {
   const {theme} = useThemeStore();
@@ -77,7 +78,14 @@ function App() {
               <Navbar />
               <UserOrder />
             </PrivateRoute>
-          } />
+      } />
+
+    <Route path="/orders" element={
+            <PrivateRoute allowedRoles={["admin"]}>
+              <Navbar />
+              <OrderPageAdmin />
+            </PrivateRoute>
+      } />
     </Routes>
 
       <Toaster />

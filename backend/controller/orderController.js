@@ -50,18 +50,38 @@ export const getAllOrders = async (req, res) => {
     const { data: orders, error } = await supabase
       .from('orders')
       .select('*')
-      .order('created_at', { ascending: false }); // Fetch orders in descending order
+      .order('created_at', { ascending: false });
 
-      if (error) throw error;
+    if (error) throw error;
 
-      if(!orders || orders.length === 0) {
-        return res.status(404).json({ success: false, message: "No orders found" });
-      }
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ success: false, message: "No orders found" });
+    }
+
+    // For each order, fetch the corresponding user profile
+    const ordersWithUser = await Promise.all(
+      orders.map(async (order) => {
+        const { data: userData, error: userError } = await supabase
+          .from('profiles')
+          .select('firstname, lastname')
+          .eq('id', order.owner_id)
+          .single();
+
+        if (userError) {
+          throw userError;
+        }
+
+        return {
+          ...order,
+          user: userData,
+        };
+      })
+    );
 
     return res.status(200).json({
       success: true,
-      orders,
-      message: "Orders fetched successfully"
+      orders: ordersWithUser,
+      message: "Orders fetched successfully",
     });
   } catch (error) {
     console.error("Error fetching orders:", error.message);
@@ -71,8 +91,8 @@ export const getAllOrders = async (req, res) => {
       error: error.message,
     });
   }
+};
 
-}
 export const getUserOrders = async (req, res) => {
   try {
     const access_token = req.cookies?.access_token;
@@ -85,7 +105,8 @@ export const getUserOrders = async (req, res) => {
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
       .select('*')
-      .eq('owner_id', user.id);
+      .eq('owner_id', user.id)
+      .order('created_at', { ascending: false });
 
     if (ordersError) throw ordersError;
     if (!orders || orders.length === 0) {
