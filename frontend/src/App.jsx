@@ -13,22 +13,31 @@ import UserPage from "./pages/UserPage";
 import CartPage from "./pages/CartPage";
 import { useProductStore } from "./store/useProductStore";
 import { useEffect } from "react";
-import { fLogic } from "./store/fLogic";
 import UserOrder from "./pages/UserOrder";
 import OrderPageAdmin from "./pages/OrderPageAdmin";
+import { useOrderStore } from "./store/useOrder";
+import useAuth from "./hooks/useAuth";
+import LoadingScreen from "./components/LoadingScreen";
 
 function App() {
   const {theme} = useThemeStore();
   const fetchUserCart = useProductStore((state) => state.fetchUserCart);
   const {fetchProducts} = useProductStore();
-  useEffect(() => {
-      fetchUserCart(); // fetch cart only if user is present
-  }, [fetchUserCart]);
+  const {getAllOrders} = useOrderStore();
+  const authenticated = useAuth();
 
   useEffect(() => {
-      fetchProducts(); // fetch products only if user is present
-  }, [fetchProducts]);
+    if (authenticated) {
+      fetchUserCart();
+      fetchProducts();
+      getAllOrders();
+    }
+  }, [authenticated, fetchUserCart, fetchProducts, getAllOrders]);
   
+  if (authenticated === null) {
+    return <LoadingScreen message="Loading Initialized...." />;
+  }
+
   return (
     <div className="min-h-screen bg-base-200 transition-colors duration-300" data-theme={theme}>
     <Routes>
