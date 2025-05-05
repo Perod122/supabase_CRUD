@@ -4,6 +4,7 @@ import { LogOutIcon, NotebookPen, NotepadText, SettingsIcon, ShoppingBagIcon, Sh
 import { fLogic } from '../store/fLogic';
 import ThemeSelector from './ThemeSelector';
 import { useProductStore } from '@/store/useProductStore';
+import { useOrderStore } from '@/store/useOrder';
 
 
 function Navbar() {
@@ -12,7 +13,7 @@ function Navbar() {
   const user = fLogic((state) => state.user);
   const {cart} = useProductStore();
   const creds = fLogic((state) => state.creds);
-
+  const {AllOrder} = useOrderStore();
   const getInitials = () => {
     if (!user?.firstname && !user?.lastname) return '?';
     const firstInitial = user?.firstname ? user.firstname.charAt(0).toUpperCase() : '';
@@ -21,9 +22,10 @@ function Navbar() {
   };
   
   useEffect(() => {
-    fetchUser(); 
+    fetchUser();
   }, [fetchUser]);
   
+
 
   return (
     <div className="bg-base-100/80 backdrop-blur-lg border-b border-base-content/10 sticky top-0 z-50">
@@ -54,6 +56,11 @@ function Navbar() {
                 title="My Orders"
               >
                 <NotebookPen className="size-5" />
+                { AllOrder.length > 0 && (
+                <span className="badge badge-sm badge-primary absolute top-2 right-0 translate-x-1/2 -translate-y-1/2">
+                  {AllOrder.length}
+                </span>
+                )}
               </button>
             </Link>
             <div className="indicator">
@@ -74,6 +81,7 @@ function Navbar() {
           </div>
           </>
           ) : (
+            <div className="indicator">
             <Link to="/orders">
               <button
                 tabIndex={0}
@@ -81,8 +89,14 @@ function Navbar() {
                 title="My Cart"
               >
                 <NotepadText className="size-5" />
+                { AllOrder.length > 0 && (
+                <span className="badge badge-sm badge-primary absolute top-2 right-0 translate-x-1/2 -translate-y-1/2">
+                  {AllOrder.length}
+                </span>
+                )}
               </button>
               </Link>
+              </div>
           )}
               <div className="dropdown dropdown-end">
                 <button className="btn btn-ghost btn-circle" title="My Profile">

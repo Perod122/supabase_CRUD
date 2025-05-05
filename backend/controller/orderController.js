@@ -70,14 +70,21 @@ export const getAllOrders = async (req, res) => {
         if (userError) {
           throw userError;
         }
+        const { data: items, error: itemsError } = await supabase
+          .from('order_items')
+          .select('*, product:product_id(*)') // Join with products via foreign key
+          .eq('order_id', order.order_id);
+
+        if (itemsError) throw itemsError;
 
         return {
           ...order,
+          items,
           user: userData,
         };
       })
     );
-
+  
     return res.status(200).json({
       success: true,
       orders: ordersWithUser,
@@ -131,7 +138,6 @@ export const getUserOrders = async (req, res) => {
       })
     );
 
-    console.log("User orders fetched successfully:", detailedOrders);
     // Step 3: Return structured order with items and product info
     return res.status(200).json({
       success: true,

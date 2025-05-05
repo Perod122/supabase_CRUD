@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useOrderStore } from '@/store/useOrder';
-import { ShoppingBag, Truck, DollarSign, User, Clock, Search, Filter, ChevronDown, ArrowUpDown, XIcon } from 'lucide-react';
+import { ShoppingBag, Truck, DollarSign, User, Clock, Search, Filter, ChevronDown, ArrowUpDown, XIcon, X } from 'lucide-react';
 
 function OrderPageAdmin() {
   const { AllOrder, getAllOrders } = useOrderStore();
@@ -110,9 +110,9 @@ function OrderPageAdmin() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-base-100 rounded-lg shadow p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2 text-gray-800">Order Management</h1>
+        <h1 className="text-2xl font-bold mb-2 text-base-content">Order Management</h1>
         <p className="text-gray-500">Manage and track all customer orders</p>
       </div>
       
@@ -125,7 +125,7 @@ function OrderPageAdmin() {
           <input
             type="text"
             placeholder="Search by customer name or order ID"
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="pl-10 pr-4 py-2 border border-gray-300 bg-base-100 text-base-content rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -133,7 +133,7 @@ function OrderPageAdmin() {
         
         <div className="relative w-full md:w-48">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Filter className="h-5 w-5 text-gray-400" />
+            <Filter className="h-5 w-5 text-base-content" />
           </div>
           <select
             value={statusFilter}
@@ -226,11 +226,11 @@ function OrderPageAdmin() {
                       <div className="text-sm text-gray-900 capitalize">{order.payment_method}</div>
                     </td>
                     <td className="px-6 float-end py-4 whitespace-nowrap  space-x-2">
-                    <button className="btn btn-sm btn-primary"
+                    <button className="btn btn-sm bg-base-200"
                     onClick={() => setSelectedOrder(order)}>
                         Details
                         </button>
-                      <button className="btn btn-sm btn-primary">
+                      <button className="btn btn-sm ">
                         Update
                         </button>
                     </td>
@@ -252,6 +252,58 @@ function OrderPageAdmin() {
           </p>
         </div>
       )}
+        {selectedOrder && (
+                <div className="modal modal-open">
+                  <div className="modal-box max-w-2xl">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-bold">Ordered Items {selectedOrder.order_id}</h3>
+                      <button 
+                        className="btn btn-sm btn-circle btn-ghost"
+                        onClick={() => setSelectedOrder(null)}
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </div>
+        
+                    <div className="flex-1 lg:max-h-[calc(100vh-180px)] lg:overflow-y-auto lg:pr-2">
+                  
+        
+                      <div>
+                        <ul className="space-y-2">
+                          {selectedOrder.items.map((item, index) => (
+                            <li key={index} className="flex items-start shadow-lg gap-4 p-4 hover:bg-base-200 rounded-lg transition-colors border border-base-200">
+                            <img
+                                src={item.product?.productImage || 'https://via.placeholder.com/150'}
+                                alt={item.product?.productName}
+                                className="w-20 h-20 object-cover rounded-lg"
+                                loading="lazy"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <h2 className="text-lg font-semibold truncate">{item.product?.productName}</h2>
+                                <div className="flex items-center mt-2 gap-2">
+                                  <span className="px-2 min-w-[20px] text-center">₱{(item.price * item.qty).toFixed(2)}</span>
+                                </div>
+                                <div className="float-end flex">
+                                  <span className="px-2 min-w-[20px] text-center">x{item.qty}</span>
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+        
+                        <div className="mt-4 pt-2 border-t border-base-200">
+                          <div className="flex justify-between font-semibold">
+                            <span>Total:</span>
+                            <span>
+                              ₱{selectedOrder.items.reduce((sum, item) => sum + (item.price * item.qty), 0).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
     </div>
   );
 }
