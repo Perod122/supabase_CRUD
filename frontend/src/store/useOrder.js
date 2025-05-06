@@ -74,4 +74,23 @@ export const useOrderStore = create((set) => ({
     }
   },
   clearOrder: () => set({ order: null, error: null }),  
+
+  updateOrderStatus: async (id, status) => {
+    set({ loading: true });
+    try {
+      await axios.put(
+        `${BASE_URL}/api/products/orders/${id}`,
+        { status },
+        { withCredentials: true }
+      );
+
+      toast.success("Status Updated Successfully");
+      window.location.href = "/orders"; // Refresh orders list
+    } catch (error) {
+      set({ error: "An error has occurred. Please try again later" });
+      console.error(error);
+    } finally {
+      set({ loading: false });
+    }
+  },
 }));

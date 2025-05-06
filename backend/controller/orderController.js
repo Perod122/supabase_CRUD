@@ -151,6 +151,23 @@ export const getUserOrders = async (req, res) => {
     });
   }
 };
+export const updateOrderStatus = async (req, res) => {
+  const {id} = req.params;
+  const {status} = req.body;
+   try {
+    const {data: updatedStatus, error} = await supabase
+    .from('orders')
+    .update({status})
+    .eq("order_id", id)
+    .select()
+    .single()
+    if (error) throw error;
+        res.status(200).json({ success: true, data: updatedStatus });
+   } catch (error) {
+        console.error("Error updateProduct:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+   }
+}
 
 /**
  * Authenticate user based on access token

@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import { useProductStore } from '@/store/useProductStore'
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeftIcon, Trash2Icon, SaveIcon } from 'lucide-react';
-import toast from 'react-hot-toast';
 import DeleteConfirmationDialog from '@/components/DeleteDialog';
 
 function ProductPage() {
