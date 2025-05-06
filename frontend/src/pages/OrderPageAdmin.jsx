@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useOrderStore } from '@/store/useOrder';
 import { ShoppingBag, Truck, DollarSign, User, Clock, Search, Filter, ChevronDown, ArrowUpDown, XIcon, X } from 'lucide-react';
+import UpdateOrderModal from '@/components/UpdateOrderModal';
 
 function OrderPageAdmin() {
   const { AllOrder, getAllOrders } = useOrderStore();
@@ -10,6 +11,7 @@ function OrderPageAdmin() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortConfig, setSortConfig] = useState({ key: 'order_id', direction: 'desc' });
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectUpdate, setSelectUpdate] = useState(null);
 
   // Status options for filtering
   const statusOptions = ['all', 'pending', 'processing', 'delivered', 'cancelled'];
@@ -230,7 +232,8 @@ function OrderPageAdmin() {
                     onClick={() => setSelectedOrder(order)}>
                         Details
                         </button>
-                      <button className="btn btn-sm ">
+                      <button className="btn btn-sm"
+                      onClick={() => setSelectUpdate(order)}>
                         Update
                         </button>
                     </td>
@@ -252,6 +255,12 @@ function OrderPageAdmin() {
           </p>
         </div>
       )}
+      {selectUpdate && (
+        <UpdateOrderModal
+          order={selectUpdate}
+          onClose={() => setSelectUpdate(null)}
+        />
+      )}
         {selectedOrder && (
                 <div className="modal modal-open">
                   <div className="modal-box max-w-2xl">
@@ -266,8 +275,7 @@ function OrderPageAdmin() {
                     </div>
         
                     <div className="flex-1 lg:max-h-[calc(100vh-180px)] lg:overflow-y-auto lg:pr-2">
-                  
-        
+                    
                       <div>
                         <ul className="space-y-2">
                           {selectedOrder.items.map((item, index) => (
