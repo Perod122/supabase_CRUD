@@ -1,29 +1,55 @@
-import LoginPage from "./pages/LoginPage";
-import Dashboard from "./pages/Dashboard";
+import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import Register from "./pages/Register";
+
+// Custom hooks
+import useAuth from "./hooks/useAuth";
+import { useThemeStore } from "./store/useThemeStore";
+import { useProductStore } from "./store/useProductStore";
+import { useOrderStore } from "./store/useOrder";
+
+// Components
+import Navbar from "./components/Navbar";
 import PrivateRoute from "./components/PrivateRoute";
 import AuthRedirect from "./components/AuthRedirect";
+import LoadingScreen from "./components/LoadingScreen";
+
+// Pages
+import LoginPage from "./pages/LoginPage";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
-import Navbar from "./components/Navbar";
-import { useThemeStore } from "./store/useThemeStore";
 import ProductPage from "./pages/ProductPage";
 import UserPage from "./pages/UserPage";
 import CartPage from "./pages/CartPage";
-import { useProductStore } from "./store/useProductStore";
-import { useEffect } from "react";
 import UserOrder from "./pages/UserOrder";
 import OrderPageAdmin from "./pages/OrderPageAdmin";
-import { useOrderStore } from "./store/useOrder";
-import useAuth from "./hooks/useAuth";
-import LoadingScreen from "./components/LoadingScreen";
+
+// Route configurations
+const ROUTES = {
+  public: [
+    { path: "/", element: LoginPage },
+    { path: "/signup", element: Register }
+  ],
+  admin: [
+    { path: "/home", element: Dashboard },
+    { path: "/product/:id", element: ProductPage },
+    { path: "/orders", element: OrderPageAdmin }
+  ],
+  user: [
+    { path: "/user", element: UserPage },
+    { path: "/mycart", element: CartPage },
+    { path: "/myorders", element: UserOrder }
+  ],
+  shared: [
+    { path: "/settings", element: Settings, roles: ["admin", "user"] }
+  ]
+};
 
 function App() {
-  const {theme} = useThemeStore();
-  const fetchUserCart = useProductStore((state) => state.fetchUserCart);
-  const {fetchProducts} = useProductStore();
-  const {getAllOrders} = useOrderStore();
+  const { theme } = useThemeStore();
+  const { fetchUserCart, fetchProducts } = useProductStore();
+  const { getAllOrders } = useOrderStore();
   const authenticated = useAuth();
 
   useEffect(() => {
@@ -35,70 +61,70 @@ function App() {
   }, [authenticated, fetchUserCart, fetchProducts, getAllOrders]);
   
   if (authenticated === null) {
-    return <LoadingScreen message="Loading Initialized...." />;
+    return <LoadingScreen message="Loading application..." />;
   }
 
   return (
     <div className="min-h-screen bg-base-200 transition-colors duration-300" data-theme={theme}>
-    <Routes>
-  {/* Public pages */}
-      <Route path="/" element={<AuthRedirect><LoginPage /></AuthRedirect>} />
-      <Route path="/signup" element={<AuthRedirect><Register /></AuthRedirect>} />
+      <Routes>
+        {/* Public Routes */}
+        {ROUTES.public.map(({ path, element: Element }) => (
+          <Route 
+            key={path} 
+            path={path} 
+            element={
+              <AuthRedirect>
+                <Element />
+              </AuthRedirect>
+            } 
+          />
+        ))}
 
-      {/* Admin-only pages */}
-      <Route path="/home" element={
-        <PrivateRoute allowedRoles={["admin"]}>
-          <Navbar />
-          <Dashboard />
-        </PrivateRoute>
-      } />
-      <Route path="/settings" element={
-        <PrivateRoute allowedRoles={["admin", "user"]}>
-          <Navbar />
-          <Settings />
-        </PrivateRoute>
-      } />
+        {/* Admin Routes */}
+        {ROUTES.admin.map(({ path, element: Element }) => (
+          <Route 
+            key={path} 
+            path={path} 
+            element={
+              <PrivateRoute allowedRoles={["admin"]}>
+                <Navbar />
+                <Element />
+              </PrivateRoute>
+            } 
+          />
+        ))}
 
-      {/* Pages accessible by normal users */}
-      <Route path="/user" element={
-        <PrivateRoute allowedRoles={["user"]}>
-          <Navbar />
-          <UserPage />
-        </PrivateRoute>
-      } />
+        {/* User Routes */}
+        {ROUTES.user.map(({ path, element: Element }) => (
+          <Route 
+            key={path} 
+            path={path} 
+            element={
+              <PrivateRoute allowedRoles={["user"]}>
+                <Navbar />
+                <Element />
+              </PrivateRoute>
+            } 
+          />
+        ))}
 
-      {/* Pages accessible by all authenticated users */}
-      <Route path="/product/:id" element={
-        <PrivateRoute allowedRoles={["admin"]}>
-          <Navbar />
-          <ProductPage />
-        </PrivateRoute>
-      } />
-
-      <Route path="/mycart" element={
-        <PrivateRoute allowedRoles={["user"]}>
-          <Navbar />
-          <CartPage />
-        </PrivateRoute>
-      } />
-
-    <Route path="/myorders" element={
-            <PrivateRoute allowedRoles={["user"]}>
-              <Navbar />
-              <UserOrder />
-            </PrivateRoute>
-      } />
-
-    <Route path="/orders" element={
-            <PrivateRoute allowedRoles={["admin"]}>
-              <Navbar />
-              <OrderPageAdmin />
-            </PrivateRoute>
-      } />
-    </Routes>
+        {/* Shared Routes */}
+        {ROUTES.shared.map(({ path, element: Element, roles }) => (
+          <Route 
+            key={path} 
+            path={path} 
+            element={
+              <PrivateRoute allowedRoles={roles}>
+                <Navbar />
+                <Element />
+              </PrivateRoute>
+            } 
+          />
+        ))}
+      </Routes>
 
       <Toaster />
-      </div>
+    </div>
   );
 }
 

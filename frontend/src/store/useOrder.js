@@ -2,10 +2,9 @@ import { create } from 'zustand';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
-
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "";
 
-export const useOrderStore = create((set) => ({
+export const useOrderStore = create((set, get) => ({
   loading: false,
   error: null,
   order: null,
@@ -85,7 +84,8 @@ export const useOrderStore = create((set) => ({
       );
 
       toast.success("Status Updated Successfully");
-      window.location.href = "/orders"; // Refresh orders list
+
+      await get().getAllOrders();
     } catch (error) {
       set({ error: "An error has occurred. Please try again later" });
       console.error(error);
