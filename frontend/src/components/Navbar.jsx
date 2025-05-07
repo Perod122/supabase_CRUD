@@ -5,6 +5,7 @@ import { fLogic } from '../store/fLogic';
 import ThemeSelector from './ThemeSelector';
 import { useProductStore } from '@/store/useProductStore';
 import { useOrderStore } from '@/store/useOrder';
+import UserOrder from '@/pages/UserOrder';
 
 
 function Navbar() {
@@ -13,7 +14,7 @@ function Navbar() {
   const user = fLogic((state) => state.user);
   const {cart} = useProductStore();
   const creds = fLogic((state) => state.creds);
-  const {AllOrder} = useOrderStore();
+  const {AllOrder, UserOrder} = useOrderStore();
   const getInitials = () => {
     if (!user?.firstname && !user?.lastname) return '?';
     const firstInitial = user?.firstname ? user.firstname.charAt(0).toUpperCase() : '';
@@ -56,9 +57,9 @@ function Navbar() {
                 title="My Orders"
               >
                 <NotebookPen className="size-5" />
-                { AllOrder.length > 0 && (
+                { UserOrder.length > 0 && (
                 <span className="badge badge-sm badge-primary absolute top-2 right-0 translate-x-1/2 -translate-y-1/2">
-                  {AllOrder.length}
+                  {UserOrder.length}
                 </span>
                 )}
               </button>

@@ -55,7 +55,7 @@ export const getAllOrders = async (req, res) => {
     if (error) throw error;
 
     if (!orders || orders.length === 0) {
-      return res.status(404).json({ success: false, message: "No orders found" });
+      return res.status(404).json({ success: false, message: "No orders foundss" });
     }
 
     // For each order, fetch the corresponding user profile
@@ -116,10 +116,7 @@ export const getUserOrders = async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (ordersError) throw ordersError;
-    if (!orders || orders.length === 0) {
-      return res.status(404).json({ success: false, message: "No orders found" });
-    }
-
+    
     // Step 2: Fetch order_items and products for each order
     const detailedOrders = await Promise.all(
       orders.map(async (order) => {
