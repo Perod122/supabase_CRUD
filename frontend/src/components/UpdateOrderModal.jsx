@@ -13,7 +13,7 @@ function UpdateOrderModal({ order, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-base-100 p-6 rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Update Order Status</h2>
           <button onClick={onClose} className="btn btn-sm text-red-500">
