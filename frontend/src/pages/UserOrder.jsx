@@ -573,7 +573,7 @@ function UserOrder() {
               <p className="text-base-content/70 mb-6">You haven't placed any orders yet.</p>
               <button 
                 className="btn btn-primary"
-                onClick={() => navigate('/shop')}
+                onClick={() => navigate('/user')}
               >
                 Start Shopping
               </button>

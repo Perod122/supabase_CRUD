@@ -49,7 +49,6 @@ export const useOrderStore = create((set, get) => ({
 
     } catch (error) {
       set({ error: error.response?.data?.message || error.message });
-      toast.error(error.response?.data?.message || "Failed to fetch orders");
       return null;
     } finally {
       set({ loading: false });

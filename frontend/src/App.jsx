@@ -48,17 +48,18 @@ const ROUTES = {
 
 function App() {
   const { theme } = useThemeStore();
-  const { fetchUserCart, fetchProducts } = useProductStore();
-  const { getAllOrders } = useOrderStore();
+  const { fetchUserCart, fetchProducts} = useProductStore();
+  const { getAllOrders, getUserOrders } = useOrderStore();
   const authenticated = useAuth();
 
   useEffect(() => {
-    if (authenticated) {
+    if (authenticated){
+      getUserOrders();
       fetchUserCart();
       fetchProducts();
       getAllOrders();
     }
-  }, [authenticated, fetchUserCart, fetchProducts, getAllOrders]);
+  }, [authenticated, getUserOrders, fetchUserCart, fetchProducts, getAllOrders]);
   
   if (authenticated === null) {
     return <LoadingScreen message="Loading application..." />;
