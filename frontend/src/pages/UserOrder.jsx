@@ -14,7 +14,8 @@ import {
   Search,
   Filter,
   ChevronLeft,
-  ChevronDown
+  ChevronDown,
+  MoreHorizontal
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -371,43 +372,57 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   }
   
   return (
-    <div className="flex justify-center mt-8">
-      <div className="join">
-        <button 
-          className="join-item btn btn-outline"
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          aria-label="Previous page"
-        >
-          <ChevronLeft className="size-4" />
-        </button>
+    <nav role="navigation" aria-label="pagination" className="mx-auto flex w-full justify-center mt-8">
+      <ul className="flex flex-row items-center gap-1">
+        <li>
+          <button 
+            className="inline-flex items-center justify-center gap-1 h-9 px-4 py-2 text-sm font-medium rounded-md border border-input bg-base-100 hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            aria-label="Go to previous page"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>Previous</span>
+          </button>
+        </li>
         
         {pages.map((page, index) => (
-          page === '...' ? (
-            <span key={`ellipsis-${index}`} className="join-item btn btn-outline">...</span>
-          ) : (
-            <button
-              key={page}
-              className={`join-item btn ${currentPage === page ? 'btn-active' : 'btn-outline'}`}
-              onClick={() => onPageChange(page)}
-              aria-current={currentPage === page ? 'page' : undefined}
-              aria-label={`Page ${page}`}
-            >
-              {page}
-            </button>
-          )
+          <li key={page === '...' ? `ellipsis-${index}` : page}>
+            {page === '...' ? (
+              <span className="flex h-9 w-9 items-center justify-center">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">More pages</span>
+              </span>
+            ) : (
+              <button
+                className={`inline-flex items-center justify-center h-9 w-9 text-sm font-medium rounded-md ${
+                  currentPage === page 
+                    ? 'bg-base-100 text-base-content hover:bg-accent hover:text-accent-foreground border border-input' 
+                    : 'hover:bg-accent hover:text-accent-foreground'
+                }`}
+                onClick={() => onPageChange(page)}
+                aria-current={currentPage === page ? 'page' : undefined}
+                aria-label={`Page ${page}`}
+              >
+                {page}
+              </button>
+            )}
+          </li>
         ))}
         
-        <button 
-          className="join-item btn btn-outline"
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          aria-label="Next page"
-        >
-          <ChevronRight className="size-4" />
-        </button>
-      </div>
-    </div>
+        <li>
+          <button 
+            className="inline-flex items-center justify-center gap-1 h-9 px-4 py-2 text-sm font-medium rounded-md border border-input bg-base-100 hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            aria-label="Go to next page"
+          >
+            <span>Next</span>
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </li>
+      </ul>
+    </nav>
   );
 };
 
@@ -544,7 +559,7 @@ function UserOrder() {
       {/* Different states */}
       {currentState === OrderStates.LOADING && (
         <div className="flex flex-col justify-center items-center h-64 gap-3">
-          <span className="loading loading-spinner loading-lg text-primary"></span>
+          <span className="loading loading-spinner loading-lg text-base-content"></span>
           <p className="text-base-content/70">Loading your orders...</p>
         </div>
       )}

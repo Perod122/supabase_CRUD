@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useOrderStore } from '@/store/useOrder';
-import { ShoppingBag, Truck, DollarSign, User, Clock, Search, Filter, ChevronDown, ArrowUpDown, XIcon, X } from 'lucide-react';
+import { ShoppingBag, Truck, DollarSign, User, Clock, Search, Filter, ChevronDown, ArrowUpDown, XIcon, X, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import UpdateOrderModal from '@/components/UpdateOrderModal';
 
 function OrderPageAdmin() {
@@ -12,6 +12,8 @@ function OrderPageAdmin() {
   const [sortConfig, setSortConfig] = useState({ key: 'order_id', direction: 'desc' });
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectUpdate, setSelectUpdate] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   // Status options for filtering
   const statusOptions = ['all', 'pending', 'processing', 'delivered', 'cancelled'];
@@ -101,13 +103,116 @@ function OrderPageAdmin() {
     }
   };
 
+  // Paginate orders
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredOrders.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredOrders, currentPage, itemsPerPage]);
+
+  // Calculate total pages
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(filteredOrders.length / itemsPerPage));
+  }, [filteredOrders, itemsPerPage]);
+
+  // Pagination component
+  const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+    const pages = [];
+    
+    // Add logic to show limited page numbers with ellipsis for large numbers
+    if (totalPages <= 7) {
+      // Show all pages if 7 or fewer
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always include first page
+      pages.push(1);
+      
+      // Calculate start and end of pages to show
+      let startPage = Math.max(2, currentPage - 2);
+      let endPage = Math.min(totalPages - 1, currentPage + 2);
+      
+      // Add ellipsis if needed before startPage
+      if (startPage > 2) {
+        pages.push('...');
+      }
+      
+      // Add pages
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      // Add ellipsis if needed after endPage
+      if (endPage < totalPages - 1) {
+        pages.push('...');
+      }
+      
+      // Always include last page
+      pages.push(totalPages);
+    }
+    
+    return (
+      <nav role="navigation" aria-label="pagination" className="mx-auto flex w-full justify-center mt-8">
+        <ul className="flex flex-row items-center gap-1">
+          <li>
+            <button 
+              className="inline-flex items-center justify-center gap-1 h-9 px-4 py-2 text-sm font-medium rounded-md border border-input bg-base-100 hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              aria-label="Go to previous page"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span>Previous</span>
+            </button>
+          </li>
+          
+          {pages.map((page, index) => (
+            <li key={page === '...' ? `ellipsis-${index}` : page}>
+              {page === '...' ? (
+                <span className="flex h-9 w-9 items-center justify-center">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">More pages</span>
+                </span>
+              ) : (
+                <button
+                  className={`inline-flex items-center justify-center h-9 w-9 text-sm font-medium rounded-md ${
+                    currentPage === page 
+                      ? 'bg-base-100 text-base-content hover:bg-accent hover:text-accent-foreground border border-input' 
+                      : 'hover:bg-accent hover:text-accent-foreground'
+                  }`}
+                  onClick={() => onPageChange(page)}
+                  aria-current={currentPage === page ? 'page' : undefined}
+                  aria-label={`Page ${page}`}
+                >
+                  {page}
+                </button>
+              )}
+            </li>
+          ))}
+          
+          <li>
+            <button 
+              className="inline-flex items-center justify-center gap-1 h-9 px-4 py-2 text-sm font-medium rounded-md border border-input bg-base-100 hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              aria-label="Go to next page"
+            >
+              <span>Next</span>
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </li>
+        </ul>
+      </nav>
+    );
+  };
+
   // Loading state
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mb-4"></div>
-        <p className="text-gray-500">Loading orders...</p>
-      </div>
+      <div className="flex flex-col justify-center items-center h-64 gap-3">
+          <span className="loading loading-spinner loading-lg text-base-content"></span>
+          <p className="text-base-content/70">Loading your orders...</p>
+        </div>
     );
   }
 
@@ -163,87 +268,102 @@ function OrderPageAdmin() {
       
       {/* Orders table */}
       {filteredOrders.length > 0 ? (
-        <div className="overflow-x-auto border border-gray-200 rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort('customer')}
-                >
-                  <div className="flex items-center">
-                    <span>Customer</span>
-                    <ArrowUpDown className="ml-1 h-4 w-4" />
-                  </div>
-                </th>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort('status')}
-                >
-                  <div className="flex items-center">
-                    <span>Status</span>
-                    <ArrowUpDown className="ml-1 h-4 w-4" />
-                  </div>
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Delivery Address
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Payment Method
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredOrders.map((order) => {
-                const statusInfo = getStatusInfo(order.status);
-                return (
-                  <tr key={order.order_id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center">
-                          <User className="h-4 w-4 text-gray-500" />
-                        </div>
-                        <div className="ml-3">
-                          <div className="text-sm font-medium text-gray-900">
-                            {order.user.firstname} {order.user.lastname}
+        <>
+          <div className="overflow-x-auto border border-gray-200 rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th 
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('customer')}
+                  >
+                    <div className="flex items-center">
+                      <span>Customer</span>
+                      <ArrowUpDown className="ml-1 h-4 w-4" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('status')}
+                  >
+                    <div className="flex items-center">
+                      <span>Status</span>
+                      <ArrowUpDown className="ml-1 h-4 w-4" />
+                    </div>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Delivery Address
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Payment Method
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {paginatedOrders.map((order) => {
+                  const statusInfo = getStatusInfo(order.status);
+                  return (
+                    <tr key={order.order_id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center">
+                            <User className="h-4 w-4 text-gray-500" />
+                          </div>
+                          <div className="ml-3">
+                            <div className="text-sm font-medium text-gray-900">
+                              {order.user.firstname} {order.user.lastname}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
-                        {statusInfo.icon}
-                        <span className="ml-1 capitalize">{order.status}</span>
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 max-w-xs truncate">
-                        {order.delivery_address}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 capitalize">{order.payment_method}</div>
-                    </td>
-                    <td className="px-6 float-end py-4 whitespace-nowrap  space-x-2">
-                    <button className="btn btn-sm bg-base-200"
-                    onClick={() => setSelectedOrder(order)}>
-                        Details
-                        </button>
-                      <button className="btn btn-sm"
-                      onClick={() => setSelectUpdate(order)}>
-                        Update
-                        </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
+                          {statusInfo.icon}
+                          <span className="ml-1 capitalize">{order.status}</span>
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900 max-w-xs truncate">
+                          {order.delivery_address}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 capitalize">{order.payment_method}</div>
+                      </td>
+                      <td className="px-6 float-end py-4 whitespace-nowrap  space-x-2">
+                      <button className="btn btn-sm bg-base-200"
+                      onClick={() => setSelectedOrder(order)}>
+                          Details
+                          </button>
+                        <button className="btn btn-sm"
+                        onClick={() => setSelectUpdate(order)}>
+                          Update
+                          </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
+          
+          {/* Results summary */}
+          <div className="text-center text-sm text-gray-500 mt-4">
+            Showing {paginatedOrders.length} of {filteredOrders.length} orders
+          </div>
+        </>
       ) : (
         <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
           <ShoppingBag className="mx-auto h-12 w-12 text-gray-400" />
