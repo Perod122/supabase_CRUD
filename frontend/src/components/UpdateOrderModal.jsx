@@ -31,10 +31,11 @@ function UpdateOrderModal({ order, onClose, onSave }) {
             required
         >
             <option value="" disabled>Select status</option>
-            <option value={order.status}>{order.status}</option>
-            <option value="in-progress">In Progress</option>
-            <option value="shipped">Shipped</option>
+            <option value="For Delivery">For Delivery</option>
+            <option value={order.status} defaultValue hidden>{order.status}</option>
+            <option value="pending">Pending</option>
             <option value="delivered">Delivered</option>
+            <option value="shipped">Shipped</option>
             <option value="cancelled">Cancelled</option>
         </select>
         </div>

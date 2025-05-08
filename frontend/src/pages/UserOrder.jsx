@@ -15,7 +15,8 @@ import {
   Filter,
   ChevronLeft,
   ChevronDown,
-  MoreHorizontal
+  MoreHorizontal,
+  BoxIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -141,6 +142,8 @@ const OrderCard = memo(({ order, onViewDetails }) => {
         return { color: 'bg-green-100 text-green-800', icon: <ShoppingBag className="w-4 h-4" /> };
       case 'cancelled':
         return { color: 'bg-red-100 text-red-800', icon: <DollarSign className="w-4 h-4" /> };
+      case 'shipped':
+        return { color: 'bg-green-100 text-green-800', icon: <BoxIcon className="w-4 h-4" /> };
       default:
         return { color: 'bg-gray-100 text-gray-800', icon: <Clock className="w-4 h-4" /> };
     }
