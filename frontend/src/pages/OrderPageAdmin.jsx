@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useOrderStore } from '@/store/useOrder';
-import { ShoppingBag, Truck, DollarSign, User, Clock, Search, Filter, ChevronDown, ArrowUpDown, XIcon, X, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ShoppingBag, Truck, DollarSign, User, Clock, Search, Filter, ChevronDown, ArrowUpDown, XIcon, X, ChevronLeft, ChevronRight, MoreHorizontal, BoxIcon } from 'lucide-react';
 import UpdateOrderModal from '@/components/UpdateOrderModal';
 
 function OrderPageAdmin() {
@@ -13,7 +13,7 @@ function OrderPageAdmin() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectUpdate, setSelectUpdate] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
 
   // Status options for filtering
   const statusOptions = ['all', 'pending', 'processing', 'delivered', 'cancelled'];
@@ -98,6 +98,8 @@ function OrderPageAdmin() {
         return { color: 'bg-green-100 text-green-800', icon: <ShoppingBag className="w-4 h-4" /> };
       case 'cancelled':
         return { color: 'bg-red-100 text-red-800', icon: <DollarSign className="w-4 h-4" /> };
+      case 'shipped':
+        return { color: 'bg-green-100 text-green-800', icon: <BoxIcon className="w-4 h-4" /> };
       default:
         return { color: 'bg-gray-100 text-gray-800', icon: <Clock className="w-4 h-4" /> };
     }
