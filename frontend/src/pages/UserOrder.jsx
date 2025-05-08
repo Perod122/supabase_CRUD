@@ -19,13 +19,62 @@ import {
   BoxIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Animation variants
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.4 } },
+  exit: { opacity: 0, transition: { duration: 0.2 } }
+};
+
+const slideUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  exit: { opacity: 0, y: -20, transition: { duration: 0.2 } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariant = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  },
+  exit: { opacity: 0, y: -20, transition: { duration: 0.2 } }
+};
+
+const scaleUp = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  },
+  exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } }
+};
 
 // Extracted OrderItem component for better performance and organization
 const OrderItem = memo(({ item }) => {
   return (
-    <li className="flex items-start gap-4 p-4 hover:bg-base-200 rounded-lg transition-colors border border-base-200">
+    <motion.li 
+      variants={itemVariant}
+      className="flex items-start gap-4 p-4 hover:bg-base-200 rounded-lg transition-colors border border-base-200"
+    >
       <div className="relative w-20 h-20 overflow-hidden rounded-lg bg-base-300">
-        <img
+        <motion.img
+          whileHover={{ scale: 1.1 }}
+          transition={{ type: "spring", stiffness: 300 }}
           src={item.product?.productImage || '/placeholder-image.png'}
           alt={item.product?.productName}
           className="w-full h-full object-cover"
@@ -46,7 +95,7 @@ const OrderItem = memo(({ item }) => {
           <span className="font-semibold">₱{(item.price * item.qty).toFixed(2)}</span>
         </div>
       </div>
-    </li>
+    </motion.li>
   );
 });
 
@@ -58,17 +107,35 @@ const OrderDetailsModal = ({ order, onClose }) => {
   const totalAmount = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
   
   return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-3xl relative">
-        <button 
+    <motion.div 
+      className="modal modal-open"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div 
+        className="modal-box max-w-3xl relative"
+        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: "spring", damping: 20, stiffness: 300 }}
+      >
+        <motion.button 
+          whileHover={{ scale: 1.1, rotate: 90 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
           className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
           onClick={onClose}
           aria-label="Close modal"
         >
           <X className="size-4" />
-        </button>
+        </motion.button>
         
-        <div className="mb-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-6"
+        >
           <div className="flex items-center gap-2 mb-1">
             <Package className="size-5 text-primary" />
             <h3 className="text-xl font-bold">Order #{order.order_id}</h3>
@@ -90,19 +157,29 @@ const OrderDetailsModal = ({ order, onClose }) => {
               <span className="capitalize">{order.payment_method}</span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         <div className="divider my-2">Items</div>
 
-        <div className="max-h-[400px] overflow-y-auto pr-1">
+        <motion.div 
+          className="max-h-[400px] overflow-y-auto pr-1"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
           <ul className="space-y-3">
             {order.items.map((item, index) => (
               <OrderItem key={index} item={item} />
             ))}
           </ul>
-        </div>
+        </motion.div>
 
-        <div className="mt-6 pt-4 border-t border-base-200 space-y-2">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-6 pt-4 border-t border-base-200 space-y-2"
+        >
           <div className="flex justify-between">
             <span className="text-base-content/70">Subtotal</span>
             <span>₱{totalAmount.toFixed(2)}</span>
@@ -117,14 +194,21 @@ const OrderDetailsModal = ({ order, onClose }) => {
             <span>Total</span>
             <span className="text-primary">₱{totalAmount.toFixed(2)}</span>
           </div>
-        </div>
+        </motion.div>
         
         <div className="modal-action">
-          <button className="btn btn-neutral" onClick={onClose}>Close</button>
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="btn btn-neutral" 
+            onClick={onClose}
+          >
+            Close
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
       <div className="modal-backdrop" onClick={onClose}></div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -150,7 +234,11 @@ const OrderCard = memo(({ order, onViewDetails }) => {
   };
   const statusInfo = getStatusInfo(order.status);
   return (
-    <div className="card bg-base-100 shadow-md hover:shadow-lg transition-all border border-base-200/50 rounded-lg overflow-hidden">
+    <motion.div 
+      variants={itemVariant}
+      className="card bg-base-100 shadow-md hover:shadow-lg transition-all border border-base-200/50 rounded-lg overflow-hidden"
+      whileHover={{ y: -5 }}
+    >
       <div className="card-body p-4 sm:p-5">
         {/* Mobile Layout (Stacked) */}
         <div className="md:hidden space-y-3">
@@ -159,10 +247,13 @@ const OrderCard = memo(({ order, onViewDetails }) => {
               <Package className="size-5 text-primary" />
               <span className="font-semibold">Order #{order.order_id}</span>
             </div>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
+            <motion.span 
+              whileHover={{ scale: 1.1 }}
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}
+            >
               {statusInfo.icon}
               <span className="ml-1 capitalize">{order.status}</span>
-            </span>
+            </motion.span>
           </div>
           
           <div className="flex items-center gap-2 text-sm">
@@ -181,13 +272,15 @@ const OrderCard = memo(({ order, onViewDetails }) => {
               <p className="font-semibold">₱{totalAmount.toFixed(2)}</p>
             </div>
             
-            <button 
+            <motion.button 
+              whileHover={{ scale: 1.05, x: 3 }}
+              whileTap={{ scale: 0.95 }}
               className="btn btn-sm btn-primary"
               onClick={() => onViewDetails(order)}
               aria-label={`View details for order #${order.order_id}`}
             >
               View Details <ChevronRight className="size-4" />
-            </button>
+            </motion.button>
           </div>
         </div>
 
@@ -201,10 +294,13 @@ const OrderCard = memo(({ order, onViewDetails }) => {
           </div>
 
           <div className="col-span-2">
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
+            <motion.span 
+              whileHover={{ scale: 1.1 }}
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}
+            >
               {statusInfo.icon}
-            <span className="ml-1 capitalize">{order.status}</span>
-            </span>
+              <span className="ml-1 capitalize">{order.status}</span>
+            </motion.span>
           </div>
 
           {/* Delivery Address */}
@@ -226,17 +322,19 @@ const OrderCard = memo(({ order, onViewDetails }) => {
           </div>
           
           <div className="col-span-1 flex justify-end">
-            <button 
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               className="btn btn-sm btn-primary"
               onClick={() => onViewDetails(order)}
               aria-label={`View details for order #${order.order_id}`}
             >
               Details
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 });
 
@@ -259,7 +357,12 @@ const OrderSearchFilters = ({
   ];
   
   return (
-    <div className="bg-base-100 p-4 rounded-lg shadow mb-6 border border-base-200/50">
+    <motion.div 
+      variants={fadeIn}
+      initial="hidden"
+      animate="visible"
+      className="bg-base-100 p-4 rounded-lg shadow mb-6 border border-base-200/50"
+    >
       <div className="flex flex-col md:flex-row gap-4">
         {/* Search Input */}
         <div className="flex-1">
@@ -267,7 +370,8 @@ const OrderSearchFilters = ({
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <Search className="size-4 text-base-content/50" />
             </div>
-            <input
+            <motion.input
+              whileFocus={{ boxShadow: "0 0 0 2px rgba(66, 153, 225, 0.5)" }}
               type="text"
               className="input input-bordered w-full pl-10"
               placeholder="Search by order number or address..."
@@ -280,22 +384,29 @@ const OrderSearchFilters = ({
         {/* Status Filter Dropdown */}
         <div className="w-full md:w-48">
           <div className="dropdown w-full">
-            <div tabIndex={0} role="button" className="btn btn-outline w-full flex justify-between items-center">
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              tabIndex={0} 
+              role="button" 
+              className="btn btn-outline w-full flex justify-between items-center"
+            >
               <div className="flex items-center gap-2">
                 <Filter className="size-4" />
                 <span>{statusFilter === '' ? 'All Status' : statusFilter}</span>
               </div>
               <ChevronDown className="size-4" />
-            </div>
+            </motion.div>
             <ul tabIndex={0} className="dropdown-content z-10 menu p-2 shadow bg-base-100 rounded-box w-full">
               {statuses.map((status) => (
                 <li key={status}>
-                  <button 
+                  <motion.button 
+                    whileHover={{ backgroundColor: "rgba(0, 0, 0, 0.05)" }}
                     onClick={() => onStatusFilterChange(status === 'All' ? '' : status)}
                     className={status === (statusFilter || 'All') ? 'active' : ''}
                   >
                     {status}
-                  </button>
+                  </motion.button>
                 </li>
               ))}
             </ul>
@@ -305,19 +416,26 @@ const OrderSearchFilters = ({
         {/* Sort By Dropdown */}
         <div className="w-full md:w-48">
           <div className="dropdown w-full">
-            <div tabIndex={0} role="button" className="btn btn-outline w-full flex justify-between items-center">
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              tabIndex={0} 
+              role="button" 
+              className="btn btn-outline w-full flex justify-between items-center"
+            >
               <span>Sort: {sortOptions.find(opt => opt.value === sortBy)?.label}</span>
               <ChevronDown className="size-4" />
-            </div>
+            </motion.div>
             <ul tabIndex={0} className="dropdown-content z-10 menu p-2 shadow bg-base-100 rounded-box w-full">
               {sortOptions.map((option) => (
                 <li key={option.value}>
-                  <button 
+                  <motion.button 
+                    whileHover={{ backgroundColor: "rgba(0, 0, 0, 0.05)" }}
                     onClick={() => onSortChange(option.value)}
                     className={sortBy === option.value ? 'active' : ''}
                   >
                     {option.label}
-                  </button>
+                  </motion.button>
                 </li>
               ))}
             </ul>
@@ -325,15 +443,17 @@ const OrderSearchFilters = ({
         </div>
 
         {/* Sort Order Button */}
-        <button 
+        <motion.button 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           className="btn btn-outline md:w-12"
           onClick={() => onSortOrderChange(sortOrder === 'asc' ? 'desc' : 'asc')}
           title={sortOrder === 'asc' ? 'Ascending Order' : 'Descending Order'}
         >
           {sortOrder === 'asc' ? '↑' : '↓'}
-        </button>
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -375,10 +495,19 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   }
   
   return (
-    <nav role="navigation" aria-label="pagination" className="mx-auto flex w-full justify-center mt-8">
+    <motion.nav 
+      variants={fadeIn}
+      initial="hidden"
+      animate="visible"
+      role="navigation" 
+      aria-label="pagination" 
+      className="mx-auto flex w-full justify-center mt-8"
+    >
       <ul className="flex flex-row items-center gap-1">
         <li>
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             className="inline-flex items-center justify-center gap-1 h-9 px-4 py-2 text-sm font-medium rounded-md border border-input bg-base-100 hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
@@ -386,7 +515,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           >
             <ChevronLeft className="h-4 w-4" />
             <span>Previous</span>
-          </button>
+          </motion.button>
         </li>
         
         {pages.map((page, index) => (
@@ -397,24 +526,28 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                 <span className="sr-only">More pages</span>
               </span>
             ) : (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 className={`inline-flex items-center justify-center h-9 w-9 text-sm font-medium rounded-md ${
                   currentPage === page 
-                    ? 'bg-base-100 text-base-content hover:bg-accent hover:text-accent-foreground border border-input' 
-                    : 'hover:bg-accent hover:text-accent-foreground'
+                    ? 'bg-gray-200 text-primary-content hover:bg-gray-300 hover:text-primary-content border-none' 
+                    : 'hover:bg-gray-400 hover:text-accent-foreground'
                 }`}
                 onClick={() => onPageChange(page)}
                 aria-current={currentPage === page ? 'page' : undefined}
                 aria-label={`Page ${page}`}
               >
                 {page}
-              </button>
+              </motion.button>
             )}
           </li>
         ))}
         
         <li>
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             className="inline-flex items-center justify-center gap-1 h-9 px-4 py-2 text-sm font-medium rounded-md border border-input bg-base-100 hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
@@ -422,10 +555,10 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           >
             <span>Next</span>
             <ChevronRight className="h-4 w-4" />
-          </button>
+          </motion.button>
         </li>
       </ul>
-    </nav>
+    </motion.nav>
   );
 };
 
@@ -531,19 +664,31 @@ function UserOrder() {
   else if (filteredOrders.length === 0) currentState = OrderStates.EMPTY;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="max-w-6xl mx-auto px-4 sm:px-6 py-8"
+    >
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <button
+      <motion.div
+        variants={slideUp}
+        initial="hidden"
+        animate="visible" 
+        className="flex items-center gap-3 mb-6"
+      >
+        <motion.button
+          whileHover={{ scale: 1.1, rotate: -10 }}
+          whileTap={{ scale: 0.9 }}
           title="Go back"
           className="btn btn-circle btn-ghost hover:bg-base-300"
           onClick={handleGoBack}
           aria-label="Go back"
         >
           <ArrowLeft className="size-5" />
-        </button>
+        </motion.button>
         <h1 className="text-2xl sm:text-3xl font-bold">Your Orders</h1>
-      </div>
+      </motion.div>
 
       {/* Search and Filtering - Only show when we have orders */}
       {currentState === OrderStates.SUCCESS && (
@@ -560,99 +705,154 @@ function UserOrder() {
       )}
 
       {/* Different states */}
-      {currentState === OrderStates.LOADING && (
-        <div className="flex flex-col justify-center items-center h-64 gap-3">
-          <span className="loading loading-spinner loading-lg text-base-content"></span>
-          <p className="text-base-content/70">Loading your orders...</p>
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {currentState === OrderStates.LOADING && (
+          <motion.div 
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col justify-center items-center h-64 gap-3"
+          >
+            <motion.span 
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="loading loading-spinner loading-lg text-primary"
+            ></motion.span>
+            <p className="text-base-content/70">Loading your orders...</p>
+          </motion.div>
+        )}
 
-      {currentState === OrderStates.ERROR && (
-        <div className="alert alert-error shadow-lg max-w-2xl mx-auto">
-          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div>
-            <h3 className="font-bold">Error loading orders</h3>
-            <div className="text-xs">Please try again later or contact support</div>
-          </div>
-          <button className="btn btn-sm" onClick={getUserOrders}>Retry</button>
-        </div>
-      )}
+        {currentState === OrderStates.ERROR && (
+          <motion.div 
+            key="error"
+            variants={scaleUp}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="alert alert-error shadow-lg max-w-2xl mx-auto"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current h-6 w-6" fill="none" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <h3 className="font-bold">Error loading orders</h3>
+              <div className="text-xs">Please try again later or contact support</div>
+            </div>
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="btn btn-sm" 
+              onClick={getUserOrders}
+            >
+              Retry
+            </motion.button>
+          </motion.div>
+        )}
 
-      {currentState === OrderStates.EMPTY && (
-        <div className="text-center py-16 max-w-md mx-auto">
-          <div className="bg-base-200 p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
-            <ShoppingBag className="size-12 text-base-content/50" />
-          </div>
-          {UserOrder.length === 0 ? (
-            <>
-              <h2 className="text-2xl font-semibold mb-3">No Orders Found</h2>
-              <p className="text-base-content/70 mb-6">You haven't placed any orders yet.</p>
-              <button 
-                className="btn btn-primary"
-                onClick={() => navigate('/user')}
-              >
-                Start Shopping
-              </button>
-            </>
-          ) : (
-            <>
-              <h2 className="text-2xl font-semibold mb-3">No Matching Orders</h2>
-              <p className="text-base-content/70 mb-6">Try adjusting your search or filters.</p>
-              <button 
-                className="btn btn-primary"
-                onClick={() => {
-                  setSearchTerm('');
-                  setStatusFilter('');
-                  setSortBy('date');
-                  setSortOrder('desc');
-                }}
-              >
-                Clear Filters
-              </button>
-            </>
-          )}
-        </div>
-      )}
+        {currentState === OrderStates.EMPTY && (
+          <motion.div 
+            key="empty"
+            variants={scaleUp}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="text-center py-16 max-w-md mx-auto"
+          >
+            <motion.div 
+              whileHover={{ y: -5, rotate: 5 }}
+              className="bg-base-200 p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6"
+            >
+              <ShoppingBag className="size-12 text-base-content/50" />
+            </motion.div>
+            {UserOrder.length === 0 ? (
+              <>
+                <h2 className="text-2xl font-semibold mb-3">No Orders Found</h2>
+                <p className="text-base-content/70 mb-6">You haven't placed any orders yet.</p>
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn btn-primary"
+                  onClick={() => navigate('/user')}
+                >
+                  Start Shopping
+                </motion.button>
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl font-semibold mb-3">No Matching Orders</h2>
+                <p className="text-base-content/70 mb-6">Try adjusting your search or filters.</p>
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn btn-primary"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setStatusFilter('');
+                    setSortBy('date');
+                    setSortOrder('desc');
+                  }}
+                >
+                  Clear Filters
+                </motion.button>
+              </>
+            )}
+          </motion.div>
+        )}
 
-      {/* Orders List */}
-      {currentState === OrderStates.SUCCESS && (
-        <>
-          <div className="space-y-4">
-            {paginatedOrders.map((order) => (
-              <OrderCard 
-                key={order.order_id} 
-                order={order} 
-                onViewDetails={handleViewDetails}
+        {/* Orders List */}
+        {currentState === OrderStates.SUCCESS && (
+          <motion.div 
+            key="success"
+            layout
+          >
+            <motion.div 
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+              className="space-y-4"
+            >
+              {paginatedOrders.map((order) => (
+                <OrderCard 
+                  key={order.order_id} 
+                  order={order} 
+                  onViewDetails={handleViewDetails}
+                />
+              ))}
+            </motion.div>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <Pagination 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
               />
-            ))}
-          </div>
-          
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <Pagination 
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          )}
-          
-          {/* Results summary */}
-          <div className="text-center text-sm text-base-content/70 mt-4">
-            Showing {paginatedOrders.length} of {filteredOrders.length} orders
-          </div>
-        </>
-      )}
+            )}
+            
+            {/* Results summary */}
+            <motion.div 
+              variants={fadeIn}
+              initial="hidden"
+              animate="visible"
+              className="text-center text-sm text-base-content/70 mt-4"
+            >
+              Showing {paginatedOrders.length} of {filteredOrders.length} orders
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Order Details Modal */}
-      {selectedOrder && (
-        <OrderDetailsModal 
-          order={selectedOrder} 
-          onClose={handleCloseModal} 
-        />
-      )}
-    </div>
+      <AnimatePresence>
+        {selectedOrder && (
+          <OrderDetailsModal 
+            order={selectedOrder} 
+            onClose={handleCloseModal} 
+          />
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 

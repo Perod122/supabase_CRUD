@@ -10,8 +10,14 @@ export const useOrderStore = create((set, get) => ({
   order: null,
   UserOrder: [],
   AllOrder: [],
-
-  setCart: (cart) => set({ cart }),
+  BuyNow: {
+    payment_method: "",
+    delivery_address: "",
+    status: "",
+    product_id: "",
+    quantity: "",
+  },
+  setBuyNow: (BuyNow) => set({ BuyNow }),
   clearOrder: () => set({ order: null, error: null }),
   placeOrder: async ({ cart, paymentMethod, deliveryAddress }) => {
     try {
@@ -25,6 +31,31 @@ export const useOrderStore = create((set, get) => ({
 
       if (data.success) {
         set({ order: data.order });
+        return data.order;
+      }
+
+      throw new Error(data.message || "Order failed");
+    } catch (error) {
+      set({ error: error.response?.data?.message || error.message });
+      toast.error(error.response?.data?.message || "Failed to place order");
+      return null;
+    } finally {
+      set({ loading: false });
+    }
+  },
+  buyNowOrder: async ({ items, paymentMethod, deliveryAddress }) => {
+    try {
+      set({ loading: true, error: null, order: null });
+      
+      const { data } = await axios.post(
+        `${BASE_URL}/api/products/orders/place`,
+        { cart: items, paymentMethod, deliveryAddress },
+        { withCredentials: true }
+      );
+
+      if (data.success) {
+        set({ order: data.order });
+        toast.success("Order placed successfully!");
         return data.order;
       }
 
@@ -71,8 +102,6 @@ export const useOrderStore = create((set, get) => ({
       set({ loading: false });
     }
   },
-  clearOrder: () => set({ order: null, error: null }),  
-
   updateOrderStatus: async (id, status) => {
     set({ loading: true });
     try {

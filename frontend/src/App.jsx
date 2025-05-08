@@ -22,6 +22,7 @@ import Settings from "./pages/Settings";
 import ProductPage from "./pages/ProductPage";
 import UserPage from "./pages/UserPage";
 import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
 import UserOrder from "./pages/UserOrder";
 import OrderPageAdmin from "./pages/OrderPageAdmin";
 
@@ -39,6 +40,7 @@ const ROUTES = {
   user: [
     { path: "/user", element: UserPage },
     { path: "/mycart", element: CartPage },
+    { path: "/checkout", element: CheckoutPage },
     { path: "/myorders", element: UserOrder }
   ],
   shared: [
@@ -70,20 +72,20 @@ function App() {
       <Routes>
         {/* Public Routes */}
         {ROUTES.public.map(({ path, element: Element }) => (
-          <Route 
+          <Route
             key={path} 
             path={path} 
             element={
               <AuthRedirect>
                 <Element />
               </AuthRedirect>
-            } 
+            }
           />
         ))}
 
         {/* Admin Routes */}
         {ROUTES.admin.map(({ path, element: Element }) => (
-          <Route 
+          <Route
             key={path} 
             path={path} 
             element={
@@ -91,13 +93,13 @@ function App() {
                 <Navbar />
                 <Element />
               </PrivateRoute>
-            } 
+            }
           />
         ))}
 
         {/* User Routes */}
         {ROUTES.user.map(({ path, element: Element }) => (
-          <Route 
+          <Route
             key={path} 
             path={path} 
             element={
@@ -105,13 +107,13 @@ function App() {
                 <Navbar />
                 <Element />
               </PrivateRoute>
-            } 
+            }
           />
         ))}
 
         {/* Shared Routes */}
         {ROUTES.shared.map(({ path, element: Element, roles }) => (
-          <Route 
+          <Route
             key={path} 
             path={path} 
             element={
@@ -119,7 +121,7 @@ function App() {
                 <Navbar />
                 <Element />
               </PrivateRoute>
-            } 
+            }
           />
         ))}
       </Routes>

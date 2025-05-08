@@ -1,14 +1,170 @@
 import DeleteConfirmationDialog from '@/components/DeleteDialog';
 import { useProductStore } from '@/store/useProductStore';
-import { ArrowLeftIcon, ShoppingBag, Plus, Minus, Trash2Icon } from 'lucide-react';
+import { ArrowLeftIcon, ShoppingBag, Plus, Minus, Trash2Icon, Package } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrderStore } from '@/store/useOrder';
 import { toast } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Cart Item Component
+const CartItem = ({ item, onDelete, onQuantityChange }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    await onDelete(item.cart_id);
+    setIsDeleting(false);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="flex items-start shadow-lg gap-4 p-4 hover:bg-base-200 rounded-lg transition-colors border border-base-200"
+    >
+      <img
+        src={item.productImage || 'https://via.placeholder.com/150'}
+        alt={item.productName}
+        className="w-20 h-20 object-cover rounded-lg"
+        loading="lazy"
+      />
+      <div className="flex-1 min-w-0">
+        <h2 className="text-lg font-semibold truncate">{item.productName}</h2>
+        <p className="text-base-content font-bold">₱{item.productPrice.toFixed(2)}</p>
+        
+        <div className="flex items-center mt-2 gap-2">
+          <button 
+            className="btn btn-xs btn-circle btn-ghost hover:bg-base-300"
+            onClick={() => onQuantityChange(item.cart_id, Math.max(1, (item.quantity || 1) - 1))}
+            disabled={isDeleting}
+          >
+            <Minus className="size-4" />
+          </button>
+          <span className="px-2 min-w-[20px] text-center">{item.quantity || 1}</span>
+          <button 
+            className="btn btn-xs btn-circle btn-ghost hover:bg-base-300"
+            onClick={() => onQuantityChange(item.cart_id, (item.quantity || 1) + 1)}
+            disabled={isDeleting}
+          >
+            <Plus className="size-4" />
+          </button>
+        </div>
+      </div>
+      <DeleteConfirmationDialog
+        onConfirm={handleDelete}
+        trigger={
+          <button 
+            className="btn btn-sm btn-error btn-outline hover:bg-error hover:text-error-content"
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <span className="loading loading-spinner loading-xs"></span>
+            ) : (
+              <Trash2Icon className="size-4" />
+            )}
+          </button>
+        }
+      />
+    </motion.div>
+  );
+};
+
+// Order Summary Component
+const OrderSummary = ({ cart, subtotal, shippingFee, total, paymentMethod, setPaymentMethod, deliveryAddress, setDeliveryAddress, onPlaceOrder, placingOrder }) => {
+  return (
+    <div className="bg-base-100 rounded-xl shadow-sm p-6 sticky top-24 border border-base-300">
+      <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+      
+      <div className="space-y-3 mb-6">
+        <div className="flex justify-between">
+          <span className="text-gray-600">Subtotal ({cart.length} items)</span>
+          <span className="font-medium">₱{subtotal.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-600">Shipping</span>
+          <span className="font-medium">
+            {shippingFee === 0 ? (
+              <span className="text-success">Free</span>
+            ) : (
+              `₱${shippingFee.toFixed(2)}`
+            )}
+          </span>
+        </div>
+        <div className="divider my-1"></div>
+        <div className="flex justify-between text-lg font-bold">
+          <span>Total</span>
+          <span className="text-base-content">₱{total.toFixed(2)}</span>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <select
+          value={paymentMethod}
+          onChange={(e) => setPaymentMethod(e.target.value)}
+          className="select select-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          <option value="COD">Cash on Delivery</option>
+          <option value="Credit Card">Credit Card</option>
+          <option value="PayPal">PayPal</option>
+        </select>
+
+        <textarea
+          placeholder="Delivery Address"
+          value={deliveryAddress}
+          onChange={(e) => setDeliveryAddress(e.target.value)}
+          className="textarea textarea-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary"
+          rows={3}
+        />
+
+        <button 
+          className="btn btn-primary w-full hover:scale-[1.02] transition-transform" 
+          onClick={onPlaceOrder}
+          disabled={placingOrder || !deliveryAddress.trim()}
+        >
+          {placingOrder ? (
+            <span className="loading loading-spinner loading-sm"></span>
+          ) : (
+            <>
+              <ShoppingBag className="size-5 mr-2" />
+              Place Order
+            </>
+          )}
+        </button>
+      </div>
+      
+      {subtotal < 500 && (
+        <div className="mt-4 text-sm text-center text-gray-500">
+          Add ₱{(500 - subtotal).toFixed(2)} more for free shipping
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Empty Cart Component
+const EmptyCart = ({ onContinueShopping }) => (
+  <motion.div 
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    className="text-center py-12 flex-1"
+  >
+    <Package className="mx-auto size-16 text-gray-400 mb-4" />
+    <h2 className="text-2xl font-semibold text-gray-600 mb-2">Your cart is empty</h2>
+    <p className="text-gray-500 mb-6">Looks like you haven't added any items yet</p>
+    <button 
+      onClick={onContinueShopping}
+      className="btn btn-primary hover:scale-[1.02] transition-transform"
+    >
+      Continue Shopping
+    </button>
+  </motion.div>
+);
 
 function CartPage() {
   const navigate = useNavigate();
-  const { cart, loading, error, fetchUserCart, deleteUserCart, clearCart } = useProductStore();
+  const { cart, loading, error, fetchUserCart, deleteUserCart, clearCart, updateCartQuantity } = useProductStore();
   const { placeOrder, loading: placingOrder } = useOrderStore();
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('COD');
@@ -53,7 +209,7 @@ function CartPage() {
           <div className="flex items-center">
             <button
               title='Go back'
-              className="btn sm:ml-56 btn-ghost hover:bg-base-200 rounded-full p-2"
+              className="btn sm:ml-56 btn-ghost hover:bg-base-200 rounded-full p-2 transition-colors"
               onClick={() => navigate(-1)}
             >
               <ArrowLeftIcon className="size-5" />
@@ -69,8 +225,9 @@ function CartPage() {
       {/* Main Content */}
       <div className="flex-1 container mx-auto px-4 py-4 max-w-4xl flex flex-col lg:flex-row gap-6 pb-20 lg:pb-4">
         {loading ? (
-          <div className="flex justify-center items-center h-64">
+          <div className="flex-1 w-full flex flex-col justify-center items-center h-64 space-y-4">
             <span className="loading loading-spinner loading-lg"></span>
+            <p className="text-base-content/70 font-medium">Loading Cart...</p>
           </div>
         ) : error ? (
           <div className="alert alert-error shadow-lg">
@@ -82,137 +239,41 @@ function CartPage() {
             </div>
           </div>
         ) : sortedCart.length === 0 ? (
-          <div className="text-center py-12 flex-1">
-            <ShoppingBag className="mx-auto size-16 text-gray-400 mb-4" />
-            <h2 className="text-2xl font-semibold text-gray-600 mb-2">Your cart is empty</h2>
-            <p className="text-gray-500 mb-6">Looks like you haven't added any items yet</p>
-            <button 
-              onClick={() => navigate('/user')} 
-              className="btn btn-primary"
-            >
-              Continue Shopping
-            </button>
-          </div>
+          <EmptyCart onContinueShopping={() => navigate('/user')} />
         ) : (
           <>
             {/* Cart Items */}
             <div className="flex-1 lg:max-h-[calc(100vh-180px)] lg:overflow-y-auto lg:pr-2">
               <div className="bg-base-100 shadow-sm p-4 border border-base-300 rounded-xl">
-                <div className="space-y-4">
-                  {sortedCart.map((item) => (
-                    <div
-                      key={item.cart_id}
-                      className="flex items-start shadow-lg gap-4 p-4 hover:bg-base-200 rounded-lg transition-colors border border-base-200"
-                    >
-                      <img
-                        src={item.productImage || 'https://via.placeholder.com/150'}
-                        alt={item.productName}
-                        className="w-20 h-20 object-cover rounded-lg"
-                        loading="lazy"
+                <AnimatePresence>
+                  <div className="space-y-4">
+                    {sortedCart.map((item) => (
+                      <CartItem
+                        key={item.cart_id}
+                        item={item}
+                        onDelete={deleteUserCart}
+                        onQuantityChange={updateCartQuantity}
                       />
-                      <div className="flex-1 min-w-0">
-                        <h2 className="text-lg font-semibold truncate">{item.productName}</h2>
-                        <p className="text-base-content font-bold">₱{item.productPrice.toFixed(2)}</p>
-                        
-                        <div className="flex items-center mt-2 gap-2">
-                          <button className="btn btn-xs btn-circle btn-ghost">
-                            <Minus className="size-4" />
-                          </button>
-                          <span className="px-2 min-w-[20px] text-center">{item.quantity || 1}</span>
-                          <button className="btn btn-xs btn-circle btn-ghost">
-                            <Plus className="size-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <DeleteConfirmationDialog
-                        onConfirm={() => deleteUserCart(item.cart_id)}
-                        trigger={
-                          <button 
-                            className="btn btn-sm btn-error btn-outline"
-                            disabled={loading}
-                          >
-                            {loading ? (
-                              <span className="loading loading-spinner loading-xs"></span>
-                            ) : (
-                              <Trash2Icon className="size-4" />
-                            )}
-                          </button>
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </AnimatePresence>
               </div>
             </div>
 
             {/* Order Summary */}
             <div className="hidden lg:block lg:w-80">
-              <div className="bg-base-100 rounded-xl shadow-sm p-6 sticky top-24 border border-base-300">
-                <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-                
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal ({sortedCart.length} items)</span>
-                    <span className="font-medium">₱{subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="font-medium">
-                      {shippingFee === 0 ? (
-                        <span className="text-success">Free</span>
-                      ) : (
-                        `₱${shippingFee.toFixed(2)}`
-                      )}
-                    </span>
-                  </div>
-                  <div className="divider my-1"></div>
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Total</span>
-                    <span className="text-base-content">₱{total.toFixed(2)}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <select
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="select select-bordered w-full"
-                  >
-                    <option value="COD">Cash on Delivery</option>
-                    <option value="Credit Card">Credit Card</option>
-                    <option value="PayPal">PayPal</option>
-                  </select>
-
-                  <textarea
-                    placeholder="Delivery Address"
-                    value={deliveryAddress}
-                    onChange={(e) => setDeliveryAddress(e.target.value)}
-                    className="textarea textarea-bordered w-full"
-                    rows={3}
-                  />
-
-                  <button 
-                    className="btn btn-primary w-full" 
-                    onClick={handlePlaceOrder}
-                    disabled={placingOrder || !deliveryAddress.trim()}
-                  >
-                    {placingOrder ? (
-                      <span className="loading loading-spinner loading-sm"></span>
-                    ) : (
-                      <>
-                        <ShoppingBag className="size-5 mr-2" />
-                        Place Order
-                      </>
-                    )}
-                  </button>
-                </div>
-                
-                {subtotal < 500 && (
-                  <div className="mt-4 text-sm text-center text-gray-500">
-                    Add ₱{(500 - subtotal).toFixed(2)} more for free shipping
-                  </div>
-                )}
-              </div>
+              <OrderSummary
+                cart={sortedCart}
+                subtotal={subtotal}
+                shippingFee={shippingFee}
+                total={total}
+                paymentMethod={paymentMethod}
+                setPaymentMethod={setPaymentMethod}
+                deliveryAddress={deliveryAddress}
+                setDeliveryAddress={setDeliveryAddress}
+                onPlaceOrder={handlePlaceOrder}
+                placingOrder={placingOrder}
+              />
             </div>
           </>
         )}
@@ -229,7 +290,7 @@ function CartPage() {
               </div>
             </div>
             <button 
-              className="btn btn-primary flex-1 max-w-[200px]"
+              className="btn btn-primary flex-1 max-w-[200px] hover:scale-[1.02] transition-transform"
               onClick={() => {
                 document.getElementById('mobile_checkout_modal').showModal();
               }}
@@ -250,7 +311,7 @@ function CartPage() {
             <select
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
-              className="select select-bordered w-full"
+              className="select select-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="COD">Cash on Delivery</option>
               <option value="Credit Card">Credit Card</option>
@@ -261,12 +322,12 @@ function CartPage() {
               placeholder="Delivery Address"
               value={deliveryAddress}
               onChange={(e) => setDeliveryAddress(e.target.value)}
-              className="textarea textarea-bordered w-full"
+              className="textarea textarea-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary"
               rows={3}
             />
 
             <button 
-              className="btn btn-primary w-full" 
+              className="btn btn-primary w-full hover:scale-[1.02] transition-transform" 
               onClick={() => {
                 handlePlaceOrder();
                 document.getElementById('mobile_checkout_modal').close();

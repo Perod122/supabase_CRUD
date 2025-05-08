@@ -1,11 +1,18 @@
 import { ShoppingBag, ShoppingCartIcon } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useProductStore } from "@/store/useProductStore";
+import { useOrderStore } from "@/store/useOrder";
+import { useState } from "react";
+import { toast } from "react-hot-toast";
 
 function ProductCardUser({ product }) {
+    const navigate = useNavigate();
+    const [isBuying, setIsBuying] = useState(false);
     const setCartData = useProductStore((state) => state.setCartData);
     const fetchUserCart = useProductStore((state) => state.fetchUserCart);
     const addToCart = useProductStore((state) => state.addToCart);
+    const placeOrder = useOrderStore((state) => state.placeOrder);
+    const setBuyNow = useOrderStore((state) => state.setBuyNow);
 
     const handleAddToCart = (e) => {
         e.preventDefault(); // prevents navigation if inside <Link>
@@ -15,6 +22,37 @@ function ProductCardUser({ product }) {
         });
         addToCart(e);
         fetchUserCart();
+    };
+
+    const handleBuyNow = async (e) => {
+        e.preventDefault();
+        
+        try {
+            setIsBuying(true);
+            
+            // Create a cart-like item structure with just this product
+            const singleItemCart = [{
+                id: product.id,
+                productName: product.productName,
+                productPrice: product.productPrice,
+                productImage: product.productImage,
+                quantity: 1
+            }];
+
+            // Navigate to checkout with the product data
+            navigate('/checkout', { 
+                state: { 
+                    buyNow: true, 
+                    items: singleItemCart,
+                    total: product.productPrice
+                }
+            });
+        } catch (error) {
+            console.error("Buy now error:", error);
+            toast.error("Failed to process your order. Please try again.");
+        } finally {
+            setIsBuying(false);
+        }
     };
 
     return (
@@ -44,10 +82,14 @@ function ProductCardUser({ product }) {
                         <ShoppingCartIcon className="size-4" />
                         Add to cart
                     </button>
-                    <Link to="" className="btn btn-sm btn-success btn-outline">
+                    <button 
+                        onClick={handleBuyNow}
+                        className="btn btn-sm btn-success btn-outline"
+                        disabled={isBuying}
+                    >
                         <ShoppingBag className="size-4" />
-                        Buy now
-                    </Link>
+                        {isBuying ? "Processing..." : "Buy now"}
+                    </button>
                 </div>
             </div>
         </div>
