@@ -10,14 +10,7 @@ export const useOrderStore = create((set, get) => ({
   order: null,
   UserOrder: [],
   AllOrder: [],
-  BuyNow: {
-    payment_method: "",
-    delivery_address: "",
-    status: "",
-    product_id: "",
-    quantity: "",
-  },
-  setBuyNow: (BuyNow) => set({ BuyNow }),
+ 
   clearOrder: () => set({ order: null, error: null }),
   placeOrder: async ({ cart, paymentMethod, deliveryAddress }) => {
     try {
