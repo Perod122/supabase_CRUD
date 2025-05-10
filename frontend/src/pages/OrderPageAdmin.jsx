@@ -336,11 +336,11 @@ function OrderPageAdmin() {
                         <div className="text-sm text-gray-900 capitalize">{order.payment_method}</div>
                       </td>
                       <td className="px-6 float-end py-4 whitespace-nowrap  space-x-2">
-                      <button className="btn btn-sm bg-base-200"
+                      <button className="btn btn-sm btn-info"
                       onClick={() => setSelectedOrder(order)}>
                           Details
                           </button>
-                        <button className="btn btn-sm"
+                        <button className="btn btn-sm btn-primary"
                         onClick={() => setSelectUpdate(order)}>
                           Update
                           </button>
@@ -383,57 +383,56 @@ function OrderPageAdmin() {
           onClose={() => setSelectUpdate(null)}
         />
       )}
-        {selectedOrder && (
-                <div className="modal modal-open">
-                  <div className="modal-box max-w-2xl">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-bold">Ordered Items {selectedOrder.order_id}</h3>
-                      <button 
-                        className="btn btn-sm btn-circle btn-ghost"
-                        onClick={() => setSelectedOrder(null)}
-                      >
-                        <X className="size-4" />
-                      </button>
-                    </div>
-        
-                    <div className="flex-1 lg:max-h-[calc(100vh-180px)] lg:overflow-y-auto lg:pr-2">
-                    
-                      <div>
-                        <ul className="space-y-2">
-                          {selectedOrder.items.map((item, index) => (
-                            <li key={index} className="flex items-start shadow-lg gap-4 p-4 hover:bg-base-200 rounded-lg transition-colors border border-base-200">
-                            <img
-                                src={item.product?.productImage || 'https://via.placeholder.com/150'}
-                                alt={item.product?.productName}
-                                className="w-20 h-20 object-cover rounded-lg"
-                                loading="lazy"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <h2 className="text-lg font-semibold truncate">{item.product?.productName}</h2>
-                                <div className="flex items-center mt-2 gap-2">
-                                  <span className="px-2 min-w-[20px] text-center">₱{(item.price * item.qty).toFixed(2)}</span>
-                                </div>
-                                <div className="float-end flex">
-                                  <span className="px-2 min-w-[20px] text-center">x{item.qty}</span>
-                                </div>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-        
-                        <div className="mt-4 pt-2 border-t border-base-200">
-                          <div className="flex justify-between font-semibold">
-                            <span>Total:</span>
-                            <span>
-                              ₱{selectedOrder.items.reduce((sum, item) => sum + (item.price * item.qty), 0).toFixed(2)}
-                            </span>
-                          </div>
+      {selectedOrder && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-2xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">Ordered Items {selectedOrder.order_id}</h3>
+              <button 
+                className="btn btn-sm btn-circle btn-ghost"
+                onClick={() => setSelectedOrder(null)}
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="flex flex-col h-[60vh]">
+              <div className="flex-1 overflow-y-auto pr-2 mb-4">
+                <ul className="space-y-2">
+                  {selectedOrder.items.map((item, index) => (
+                    <li key={index} className="flex items-start shadow-lg gap-4 p-4 hover:bg-base-200 rounded-lg transition-colors border border-base-200">
+                      <img
+                        src={item.product?.productImage || 'https://via.placeholder.com/150'}
+                        alt={item.product?.productName}
+                        className="w-20 h-20 object-cover rounded-lg"
+                        loading="lazy"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h2 className="text-lg font-semibold truncate">{item.product?.productName}</h2>
+                        <div className="flex items-center mt-2 gap-2">
+                          <span className="px-2 min-w-[20px] text-center">₱{(item.price * item.qty).toFixed(2)}</span>
+                        </div>
+                        <div className="float-end flex">
+                          <span className="px-2 min-w-[20px] text-center">x{item.qty}</span>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="sticky bottom-0 bg-base-100 pt-4 border-t border-base-content ">
+                <div className="flex justify-between font-semibold text-lg">
+                  <span>Total:</span>
+                  <span>
+                    ₱{selectedOrder.items.reduce((sum, item) => sum + (item.price * item.qty), 0).toFixed(2)}
+                  </span>
                 </div>
-              )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

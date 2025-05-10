@@ -40,9 +40,18 @@ export const useOrderStore = create((set, get) => ({
     try {
       set({ loading: true, error: null, order: null });
       
+      // Format items to match the cart structure expected by the backend
+      const formattedItems = items.map(item => ({
+        id: item.id,
+        productName: item.productName,
+        productPrice: item.productPrice,
+        productImage: item.productImage,
+        quantity: item.quantity || 1
+      }));
+      
       const { data } = await axios.post(
         `${BASE_URL}/api/products/orders/place`,
-        { cart: items, paymentMethod, deliveryAddress },
+        { cart: formattedItems, paymentMethod, deliveryAddress },
         { withCredentials: true }
       );
 

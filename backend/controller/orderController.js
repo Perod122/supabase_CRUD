@@ -19,6 +19,25 @@ export const placeOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
+    // Check stock availability for each item
+    for (const item of cart) {
+      const { data: product, error: productError } = await supabase
+        .from("Products")
+        .select("stocks")
+        .eq("id", item.id)
+        .single();
+      
+      if (productError) throw productError;
+      
+      const requestedQuantity = item.quantity || 1;
+      if (!product || product.stocks < requestedQuantity) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Not enough stock for ${item.productName}. Available: ${product ? product.stocks : 0}` 
+        });
+      }
+    }
+
     // Create order record
     const order = await createOrder(user.id, paymentMethod, deliveryAddress);
     if (!order) {
@@ -27,6 +46,31 @@ export const placeOrder = async (req, res) => {
 
     // Create order items
     await createOrderItems(order.order_id, cart);
+
+    // Update stocks for each product
+    for (const item of cart) {
+      const quantity = item.quantity || 1;
+      
+      // First get current stock
+      const { data: productData, error: getError } = await supabase
+        .from("Products")
+        .select("stocks")
+        .eq("id", item.id)
+        .single();
+      
+      if (getError) throw getError;
+      
+      // Calculate new stock
+      const newStock = Math.max(0, productData.stocks - quantity);
+      
+      // Update with new stock value
+      const { error: updateError } = await supabase
+        .from("Products")
+        .update({ stocks: newStock })
+        .eq("id", item.id);
+      
+      if (updateError) throw updateError;
+    }
 
     // Clear user's cart
     await clearUserCart(user.id);

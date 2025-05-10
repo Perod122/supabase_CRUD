@@ -1,8 +1,18 @@
-import { BadgeDollarSignIcon, CircleDollarSignIcon, DollarSign, DollarSignIcon, ImageIcon, PackageIcon, PlusCircleIcon } from "lucide-react";
+import { BadgeDollarSignIcon, CircleDollarSignIcon, DollarSign, DollarSignIcon, ImageIcon, PackageIcon, PlusCircleIcon, BoxIcon } from "lucide-react";
 import { useProductStore } from "../store/useProductStore";
+import { useState } from "react";
 
 function AddProductModal() {
   const { addProduct, formData, setFormData, loading } = useProductStore();
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+      setFormData({ ...formData, productImage: file });
+    }
+  };
 
   return (
     <dialog id="add-product-modal" className="modal">
@@ -62,7 +72,30 @@ function AddProductModal() {
               </div>
             </div>
 
-            {/* Product Image */}
+            {/* Product Stock */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text text-base font-medium">Stock Quantity</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/50">
+                  <BoxIcon className="size-5" />
+                </div>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  placeholder="Stock quantity"
+                  className="input input-bordered w-full pl-10 py-3 focus:input-primary transition-colors duration-200"
+                  value={formData.stocks}
+                  onChange={(e) =>
+                    setFormData({ ...formData, stocks: parseInt(e.target.value) || 1 })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Product Image Upload */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text text-base font-medium">Image</span>
@@ -72,15 +105,21 @@ function AddProductModal() {
                   <ImageIcon className="size-5" />
                 </div>
                 <input
-                  type="text"
-                  placeholder="https://example.com/image.jpg"
+                  type="file"
+                  accept="image/*"
                   className="input input-bordered w-full pl-10 py-3 focus:input-primary transition-colors duration-200"
-                  value={formData.productImage}
-                  onChange={(e) =>
-                    setFormData({ ...formData, productImage: e.target.value })
-                  }
+                  onChange={handleImageChange}
                 />
               </div>
+              {imagePreview && (
+                <div className="mt-2">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-32 h-32 object-cover rounded-lg"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
@@ -90,7 +129,10 @@ function AddProductModal() {
             <button
               type="button"
               className="btn btn-ghost"
-              onClick={() => document.getElementById("add-product-modal")?.close()}
+              onClick={() => {
+                document.getElementById("add-product-modal")?.close();
+                setImagePreview(null);
+              }}
             >
               Cancel
             </button>

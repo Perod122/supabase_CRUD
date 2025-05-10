@@ -1,4 +1,4 @@
-import { ShoppingBag, ShoppingCartIcon } from "lucide-react";
+import { ShoppingBag, ShoppingCartIcon, BoxIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useProductStore } from "@/store/useProductStore";
 import { useOrderStore } from "@/store/useOrder";
@@ -14,8 +14,18 @@ function ProductCardUser({ product }) {
     const placeOrder = useOrderStore((state) => state.placeOrder);
     const setBuyNow = useOrderStore((state) => state.setBuyNow);
 
+    // Determine stock status
+    const isLowStock = product.stocks <= 5;
+    const isOutOfStock = product.stocks <= 0;
+
     const handleAddToCart = (e) => {
         e.preventDefault(); // prevents navigation if inside <Link>
+        
+        if (isOutOfStock) {
+            toast.error("This product is out of stock");
+            return;
+        }
+        
         setCartData({
             product_id: product.id,  // ensure correct key
             quantity: 1,             // default quantity
@@ -26,6 +36,11 @@ function ProductCardUser({ product }) {
 
     const handleBuyNow = async (e) => {
         e.preventDefault();
+        
+        if (isOutOfStock) {
+            toast.error("This product is out of stock");
+            return;
+        }
         
         try {
             setIsBuying(true);
@@ -63,6 +78,11 @@ function ProductCardUser({ product }) {
                     alt={product.name}
                     className="absolute top-0 left-0 w-full h-full object-cover"
                 />
+                {isOutOfStock && (
+                    <div className="absolute top-0 right-0 bg-error text-error-content px-2 py-1 text-xs font-semibold">
+                        OUT OF STOCK
+                    </div>
+                )}
             </figure>
 
             <div className="card-body">
@@ -73,19 +93,27 @@ function ProductCardUser({ product }) {
                         maximumFractionDigits: 2,
                     })}
                 </p>
-                <p>Stocks: {product.stock}</p>
+                
+                <div className="flex items-center mt-1">
+                    <BoxIcon className="size-4 mr-1" />
+                    <span className={`text-sm ${isLowStock ? 'text-warning font-semibold' : ''} ${isOutOfStock ? 'text-error font-semibold' : ''}`}>
+                        {isOutOfStock ? 'Out of stock' : isLowStock ? `Only ${product.stocks} left` : `Stock: ${product.stocks}`}
+                    </span>
+                </div>
+                
                 <div className="card-actions justify-between mt-4">
                     <button
                         onClick={handleAddToCart}
-                        className="btn btn-sm btn-info btn-outline"
+                        className={`btn btn-sm ${isOutOfStock ? 'btn-disabled' : 'btn-info'} btn-outline`}
+                        disabled={isOutOfStock}
                     >
                         <ShoppingCartIcon className="size-4" />
                         Add to cart
                     </button>
                     <button 
                         onClick={handleBuyNow}
-                        className="btn btn-sm btn-success btn-outline"
-                        disabled={isBuying}
+                        className={`btn btn-sm ${isOutOfStock ? 'btn-disabled' : 'btn-success'} btn-outline`}
+                        disabled={isBuying || isOutOfStock}
                     >
                         <ShoppingBag className="size-4" />
                         {isBuying ? "Processing..." : "Buy now"}

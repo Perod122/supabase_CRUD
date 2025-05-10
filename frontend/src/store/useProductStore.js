@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { supabase } from "../config/supabaseClient";
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "";
 export const useProductStore = create((set, get) => ({
@@ -13,7 +14,8 @@ export const useProductStore = create((set, get) => ({
     formData : {
         productName: "",
         productPrice: "",
-        productImage: "",
+        productImage: null,
+        stocks: 1,
     },
     cartData: {
         product_id: "",
@@ -22,24 +24,49 @@ export const useProductStore = create((set, get) => ({
 
     setCartData: (cartData) => set({cartData}),
     setFormData: (formData) => set ({formData}),
-    resetForm: () => set({formData: {productName: "", productPrice: "", productImage: ""}}),
+    resetForm: () => set({formData: {productName: "", productPrice: "", productImage: null, stocks: 1}}),
 
     addProduct: async (e) => {
         e.preventDefault();
         set({loading: true});
         try {
             const {formData} = get();
+            
+            // Upload image to Supabase Storage
+            if (formData.productImage) {
+                const fileExt = formData.productImage.name.split('.').pop();
+                const fileName = `${Math.random()}.${fileExt}`;
+                const filePath = `shopperod/${fileName}`;
+
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('balde')
+                    .upload(filePath, formData.productImage);
+
+                if (uploadError) throw uploadError;
+
+                // Get public URL
+                const { data: { publicUrl } } = supabase.storage
+                    .from('balde')
+                    .getPublicUrl(filePath);
+
+                // Update formData with the public URL
+                formData.productImage = publicUrl;
+            }
+
+            // Create product with image URL
             await axios.post(`${BASE_URL}/api/products/create`, formData, {
-                withCredentials: true, // 🔥 very important
-              });
+                withCredentials: true,
+            });
+            
             await get().fetchProducts();
-            get().resetForm()
+            get().resetForm();
             toast.success("Product Added Successfully");
             document.getElementById("add-product-modal").close();
         } catch (error) {
-            toast.error("Something went wrong. Please try again later.");
-        }finally{
-            set({loading: false})
+            console.error("Error adding product:", error);
+            toast.error(error.message || "Something went wrong. Please try again later.");
+        } finally {
+            set({loading: false});
         }
     },
     fetchProducts: async () => {
@@ -183,6 +210,36 @@ export const useProductStore = create((set, get) => ({
         }
     },
     clearCart: () => set({ cart: [] }),
-
+    updateCartQuantity: async (cart_id, quantity) => {
+        set({loading: true});
+        try {
+            const response = await axios.put(
+                `${BASE_URL}/api/products/mycart/${cart_id}`, 
+                { quantity },
+                { withCredentials: true }
+            );
+            
+            if (response.data.success) {
+                // Update the cart item quantity locally to avoid a full refetch
+                set(state => ({
+                    cart: state.cart.map(item => 
+                        item.cart_id === cart_id 
+                        ? { ...item, quantity } 
+                        : item
+                    )
+                }));
+                
+                // Optionally, you could do a full refetch instead
+                // await get().fetchUserCart();
+                
+                toast.success("Cart updated");
+            }
+        } catch (error) {
+            console.error("Error updating cart quantity:", error);
+            toast.error(error.response?.data?.message || "Failed to update cart quantity");
+        } finally {
+            set({loading: false});
+        }
+    },
 }
 ));

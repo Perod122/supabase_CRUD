@@ -16,7 +16,7 @@ export const getProducts = async (req, res) => {
 };
 
 export const createProduct = async (req, res) => {
-    const { productName, productPrice, productImage } = req.body;
+    const { productName, productPrice, productImage, stocks = 1 } = req.body;
 
     if (!validateRequiredFields(productName, productPrice, productImage)) {
         return res.status(400).json({ success: false, message: "Please provide all fields" });
@@ -25,7 +25,7 @@ export const createProduct = async (req, res) => {
     try {
         const newProduct = await supabase
             .from("Products")
-            .insert({ productName, productPrice, productImage })
+            .insert({ productName, productPrice, productImage, stocks })
             .select()
             .single();
 
@@ -59,16 +59,16 @@ export const getProductById = async (req, res) => {
 }
 export const updateProduct = async (req, res) => {
     const { id } = req.params;
-    const { productName, productPrice, productImage } = req.body;
+    const { productName, productPrice, productImage, stocks } = req.body;
 
     if (!validateRequiredFields(productName, productPrice, productImage)) {
       return res.status(400).json({ success: false, message: "Please provide all fields" });
-  }
+    }
 
     try {
         const { data: updatedProduct, error } = await supabase
             .from("Products")
-            .update({ productName, productPrice, productImage })
+            .update({ productName, productPrice, productImage, stocks })
             .eq("id", id)
             .select()
             .single();
@@ -231,6 +231,54 @@ export const updateProduct = async (req, res) => {
         message: "Failed to fetch user cart",
         error: error.message,
       });
+    }
+  };
+
+  export const updateCartQuantity = async (req, res) => {
+    const { id } = req.params;
+    const { quantity } = req.body;
+    const access_token = req.cookies?.access_token;
+
+    try {
+      // 1. Verify user authentication
+      const { data: { user }, error: authError } = await supabase.auth.getUser(access_token);
+      if (authError) throw authError;
+      if (!user) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      }
+
+      // 2. Verify the cart item exists and belongs to this user
+      const { data: cartItem, error: findError } = await supabase
+        .from("cart")
+        .select("*, product:product_id(stocks)")
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single();
+        
+      if (findError || !cartItem) {
+        return res.status(404).json({ success: false, message: "Cart item not found" });
+      }
+
+      // 3. Check if the requested quantity is available in stock
+      if (cartItem.product && quantity > cartItem.product.stocks) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Only ${cartItem.product.stocks} items available in stock` 
+        });
+      }
+
+      // 4. Update the quantity
+      const { error: updateError } = await supabase
+        .from("cart")
+        .update({ quantity })
+        .eq("id", id);
+
+      if (updateError) throw updateError;
+      
+      res.status(200).json({ success: true, message: "Cart updated successfully" });
+    } catch (error) {
+      console.error("Failed to update cart quantity:", error);
+      res.status(500).json({ success: false, message: "Error updating cart quantity" });
     }
   };
 

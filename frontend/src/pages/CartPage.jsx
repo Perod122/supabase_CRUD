@@ -10,11 +10,36 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Cart Item Component
 const CartItem = ({ item, onDelete, onQuantityChange }) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [quantity, setQuantity] = useState(item.quantity || 1);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleDelete = async () => {
     setIsDeleting(true);
     await onDelete(item.cart_id);
     setIsDeleting(false);
+  };
+  
+  const handleQuantityChange = async (newQuantity) => {
+    // Don't allow negative quantities or zero
+    if (newQuantity < 1) return;
+    
+    // Check if we're exceeding stock limits
+    if (newQuantity > item.stocks) {
+      toast.error(`Only ${item.stocks} items available in stock`);
+      return;
+    }
+    
+    setIsUpdating(true);
+    setQuantity(newQuantity);
+    
+    try {
+      await onQuantityChange(item.cart_id, newQuantity);
+    } catch (error) {
+      // If there's an error, reset to previous quantity
+      setQuantity(item.quantity || 1);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (
@@ -37,19 +62,33 @@ const CartItem = ({ item, onDelete, onQuantityChange }) => {
         <div className="flex items-center mt-2 gap-2">
           <button 
             className="btn btn-xs btn-circle btn-ghost hover:bg-base-300"
-            onClick={() => onQuantityChange(item.cart_id, Math.max(1, (item.quantity || 1) - 1))}
-            disabled={isDeleting}
+            onClick={() => handleQuantityChange(quantity - 1)}
+            disabled={isDeleting || isUpdating || quantity <= 1}
           >
-            <Minus className="size-4" />
+            {isUpdating ? (
+              <span className="loading loading-spinner loading-xs"></span>
+            ) : (
+              <Minus className="size-4" />
+            )}
           </button>
-          <span className="px-2 min-w-[20px] text-center">{item.quantity || 1}</span>
+          <span className="px-2 min-w-[32px] text-center font-medium">{quantity}</span>
           <button 
             className="btn btn-xs btn-circle btn-ghost hover:bg-base-300"
-            onClick={() => onQuantityChange(item.cart_id, (item.quantity || 1) + 1)}
-            disabled={isDeleting}
+            onClick={() => handleQuantityChange(quantity + 1)}
+            disabled={isDeleting || isUpdating || quantity >= item.stocks}
           >
-            <Plus className="size-4" />
+            {isUpdating ? (
+              <span className="loading loading-spinner loading-xs"></span>
+            ) : (
+              <Plus className="size-4" />
+            )}
           </button>
+          
+          {item.stocks <= 5 && (
+            <span className="text-xs text-warning font-medium ml-2">
+              {item.stocks === quantity ? 'Max stock' : `${item.stocks} left`}
+            </span>
+          )}
         </div>
       </div>
       <DeleteConfirmationDialog

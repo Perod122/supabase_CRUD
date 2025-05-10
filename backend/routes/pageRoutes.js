@@ -1,5 +1,5 @@
 import express from "express";
-import { updateProduct, createProduct, getProducts, getProductById, deleteProduct, addToCart, fetchUserCart, deleteUserCart } from "../controller/productController.js";
+import { updateProduct, createProduct, getProducts, getProductById, deleteProduct, addToCart, fetchUserCart, deleteUserCart, updateCartQuantity } from "../controller/productController.js";
 import { signUp, signIn, signOut, checkSession as checkSessionHandler, updateProfile } from "../controller/authController.js";
 import checkSession from "../middleware/checkSession.js"; // This stays as is
 import { getAllOrders, getUserOrders, placeOrder, updateOrderStatus } from "../controller/orderController.js";
@@ -12,6 +12,7 @@ router.get("/orders", checkSession, getAllOrders);
 router.get("/myorders", checkSession, getUserOrders);
 router.get("/mycart", checkSession, fetchUserCart)
 router.delete("/mycart/:id", checkSession, deleteUserCart)
+router.put("/mycart/:id", checkSession, updateCartQuantity)
 router.put("/profile", checkSession, updateProfile);
 router.put("/orders/:id", checkSession, updateOrderStatus);
 router.post("/create", checkSession, createProduct);

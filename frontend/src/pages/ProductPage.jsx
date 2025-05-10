@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useProductStore } from '@/store/useProductStore'
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeftIcon, Trash2Icon, SaveIcon } from 'lucide-react';
+import { ArrowLeftIcon, Trash2Icon, SaveIcon, BoxIcon } from 'lucide-react';
 import DeleteConfirmationDialog from '@/components/DeleteDialog';
 
 function ProductPage() {
@@ -82,6 +82,28 @@ function ProductPage() {
                             onChange={(e) => setFormData({...formData, productPrice: e.target.value})}
                             />
                         </div>
+                        {/* PRODUCT STOCKS */}
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text text-base font-medium">Stock Quantity</span>
+                            </label>
+                            <div className="flex items-center">
+                                <div className="relative flex-1">
+                                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-base-content/50">
+                                        <BoxIcon className="size-5" />
+                                    </span>
+                                    <input 
+                                        type="number" 
+                                        min="0" 
+                                        step="1" 
+                                        placeholder="Available stock" 
+                                        className="input input-bordered w-full pl-10" 
+                                        value={formData.stocks || 0} 
+                                        onChange={(e) => setFormData({...formData, stocks: parseInt(e.target.value) || 0})}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                         {/* PRODUCT IMAGE URL */}
                         <div className="form-control">
                             <label className="label">
@@ -98,7 +120,10 @@ function ProductPage() {
                         {/* SUBMIT BUTTON */}
                         <div className="flex justify-end space-x-2 mt-8">
                         <DeleteConfirmationDialog
-                        onConfirm={() => deleteProduct(product.id)}
+                        onConfirm={() => {
+                            deleteProduct(id);
+                            navigate('/home');
+                        }}
                         trigger={
                         <button className="btn btn-primary btn-warning btn-outline">
                         <Trash2Icon className="size-4" />Delete

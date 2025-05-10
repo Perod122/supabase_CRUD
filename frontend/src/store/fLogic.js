@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useProductStore } from './useProductStore';
@@ -16,7 +17,7 @@ export const fLogic = create((set, get) => ({
   loading: false,
   user: null,
   creds: null,
-  form: { firstname: "", lastname: "", phone: "", gender: "" }, // NEW form state
+  form: { firstname: "", lastname: "", phone: "", gender: "" },
 
   // Setters
   setCreds: (creds) => set({ creds }),
@@ -29,7 +30,6 @@ export const fLogic = create((set, get) => ({
   setPassword: (password) => set({ password }),
   setLoading: (loading) => set({ loading }),
 
-  
   // Fetch current session user
   fetchUser: async () => {
     try {
@@ -37,10 +37,11 @@ export const fLogic = create((set, get) => ({
         withCredentials: true,
       });
       
-      if (data.success) {
-        set({ user: data.profile });
-        set({ creds: data.creds });
+      if (data.success && data.profile) {
+        // Store the entire response in state
         set({ 
+          user: data.profile,
+          creds: data.creds,
           form: { 
             firstname: data.profile.firstname || '',
             lastname: data.profile.lastname || '',
@@ -48,12 +49,23 @@ export const fLogic = create((set, get) => ({
             gender: data.profile.gender || ''
           } 
         });
-      } else {
-        console.warn("Session check failed:", data.message);
+        return data; // Return the data for potential use
       }
     } catch (err) {
       console.error("Error fetching user session:", err.response?.data?.message || err.message);
     }
+  },
+
+  // Get user initials
+  getUserInitials: () => {
+    const state = get();
+    if (state.user?.firstname) {
+      return state.user.firstname.charAt(0).toUpperCase();
+    }
+    if (state.creds?.email) {
+      return state.creds.email.charAt(0).toUpperCase();
+    }
+    return '?';
   },
 
   // Form handlers

@@ -8,7 +8,6 @@ import {
   ShoppingBagIcon, 
   ShoppingCartIcon, 
   User2Icon,
-  ChevronDown,
   Menu
 } from "lucide-react";
 import { fLogic } from '../store/fLogic';
@@ -76,6 +75,7 @@ function Navbar() {
   
   const handleSignOut = fLogic((state) => state.handleSignOut);
   const fetchUser = fLogic((state) => state.fetchUser);
+  const getUserInitials = fLogic((state) => state.getUserInitials);
   const user = fLogic((state) => state.user);
   const { cart } = useProductStore();
   const creds = fLogic((state) => state.creds);
@@ -87,16 +87,17 @@ function Navbar() {
     setIsMenuOpen(false);
   }, [location]);
   
+  // Fetch user data on mount and when location changes
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
-  
-  const getInitials = () => {
-    if (!user?.firstname && !user?.lastname) return '?';
-    const firstInitial = user?.firstname ? user.firstname.charAt(0).toUpperCase() : '';
-    const lastInitial = user?.lastname ? user.lastname.charAt(0).toUpperCase() : '';
-    return `${firstInitial}${lastInitial}`;
-  };
+    const loadUser = async () => {
+      try {
+        await fetchUser();
+      } catch (error) {
+        console.error('Error loading user:', error);
+      }
+    };
+    loadUser();
+  }, [fetchUser, location.pathname]);
 
   const isAdmin = user?.role === "admin";
   const homeRoute = isAdmin ? "/home" : "/user";
@@ -183,7 +184,7 @@ function Navbar() {
                   whileHover={{ scale: 1.1 }}
                   className="flex items-center justify-center border border-base-content size-8 rounded-full bg-base-200 text-base-content font-medium"
                 >
-                  {getInitials()}
+                  {getUserInitials()}
                 </motion.div>
               </motion.button>
               

@@ -52,20 +52,15 @@ function App() {
   const { theme } = useThemeStore();
   const { fetchUserCart, fetchProducts} = useProductStore();
   const { getAllOrders, getUserOrders } = useOrderStore();
-  const authenticated = useAuth();
+  
 
   useEffect(() => {
-    if (authenticated){
       getUserOrders();
       fetchUserCart();
       fetchProducts();
       getAllOrders();
-    }
-  }, [authenticated, getUserOrders, fetchUserCart, fetchProducts, getAllOrders]);
+  }, [ getUserOrders, fetchUserCart, fetchProducts, getAllOrders]);
   
-  if (authenticated === null) {
-    return <LoadingScreen message="Loading application..." />;
-  }
 
   return (
     <div className="min-h-screen bg-base-200 transition-colors duration-300" data-theme={theme}>
