@@ -136,7 +136,7 @@ export const updateProduct = async (req, res) => {
 }
  export const addToCart = async (req, res) => {
     try {
-      const { product_id , quantity } = req.body;
+      const { product_id, quantity } = req.body;
   
       // Extract token from Authorization header
       const access_token = req.cookies?.access_token;
@@ -154,23 +154,56 @@ export const updateProduct = async (req, res) => {
       }
       console.log("Adding to cart for user:", user.id);
 
-      const insertResult = await supabase
+      // Check if product exists in cart
+      const { data: existingCartItem, error: findError } = await supabase
         .from("cart")
-        .insert({
-            user_id: user.id,
-            product_id: product_id,
-            quantity: quantity || 1,
-        })
-        .select()
+        .select("*, product:product_id(stocks)")
+        .eq("user_id", user.id)
+        .eq("product_id", product_id)
         .single();
+
+      if (findError && findError.code !== 'PGRST116') { // PGRST116 means no rows returned
+        throw findError;
+      }
+
+      // If product exists, update quantity
+      if (existingCartItem) {
+        const newQuantity = existingCartItem.quantity + (quantity || 1);
         
-        if (insertResult.error) {
-        console.error("Insert error:", insertResult.error.message);
-        return res.status(500).json({ success: false, error: insertResult.error.message });
+        // Check if new quantity exceeds stock
+        if (existingCartItem.product && newQuantity > existingCartItem.product.stocks) {
+          return res.status(400).json({ 
+            success: false, 
+            message: `Only ${existingCartItem.product.stocks} items available in stock` 
+          });
         }
 
-        res.status(200).json({ success: true, data: insertResult.data });
+        const { data: updatedItem, error: updateError } = await supabase
+          .from("cart")
+          .update({ quantity: newQuantity })
+          .eq("id", existingCartItem.id)
+          .select()
+          .single();
+          
+        if (updateError) throw updateError;
+        
+        res.status(200).json({ success: true, data: updatedItem });
+      } else {
+        // If product doesn't exist, insert new cart item
+        const { data: newItem, error: insertError } = await supabase
+          .from("cart")
+          .insert({
+              user_id: user.id,
+              product_id: product_id,
+              quantity: quantity || 1,
+          })
+          .select()
+          .single();
+          
+        if (insertError) throw insertError;
 
+        res.status(200).json({ success: true, data: newItem });
+      }
     } catch (err) {
       console.error("Error in addToCart:", err.message);
       res.status(500).json({ success: false, message: "Server error" });
