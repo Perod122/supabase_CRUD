@@ -21,7 +21,8 @@
   "scripts": {
     "dev": "nodemon backend/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+    "build": "npm install && cd frontend && npm install && npm run build",
+    "vercel-build": "cd frontend && npm install && npm run build",
     "start": "node backend/server.js"
   },
   "keywords": [],
