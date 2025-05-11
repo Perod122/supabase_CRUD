@@ -6,7 +6,9 @@ import dotenv from "dotenv";
 import pageRoutes from "./routes/pageRoutes.js";
 import { supabase } from "./config/db.js";
 import cookieParser from "cookie-parser";
+import path from "path";
 
+const __dirname = path.resolve();
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT;
@@ -17,10 +19,21 @@ app.use(cors({
   }));
   app.use(cookieParser());
 app.use(morgan("dev"));
-app.use(helmet());
+app.use(helmet(
+    {
+        contentSecurityPolicy: false,
+      }
+));
 
 app.use("/api/products", pageRoutes);
-
+if (process.env.NODE_ENV === "production") {
+    // server our react app
+    app.use(express.static(path.join(__dirname, "/frontend/dist")));
+  
+    app.get('/{*any}', (req, res) => {
+      res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+    });
+  }
 async function initDB() {
     try {
         const {data, error} = await supabase.from("Products").select("*");
