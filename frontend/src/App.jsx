@@ -15,7 +15,7 @@ import AuthRedirect from "./components/AuthRedirect";
 import LoadingScreen from "./components/LoadingScreen";
 
 // Pages
-import LoginPage from "./pages/LoginPage";
+import LoginPage from "./pages/loginPage";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
