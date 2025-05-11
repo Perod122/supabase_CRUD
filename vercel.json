@@ -19,11 +19,15 @@
       "dest": "backend/server.js"
     },
     {
-      "handle": "filesystem"
+      "src": "/(.*\\.[a-zA-Z0-9]{1,})",
+      "dest": "/frontend/dist/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "frontend/dist/$1"
+      "dest": "/frontend/dist/index.html"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 } 
