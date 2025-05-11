@@ -213,7 +213,7 @@ function OrderPageAdmin() {
     return (
       <div className="flex flex-col justify-center items-center h-64 gap-3">
           <span className="loading loading-spinner loading-lg text-base-content"></span>
-          <p className="text-base-content/70">Loading your orders...</p>
+          <p className="text-base-content/70">Loading orders...</p>
         </div>
     );
   }

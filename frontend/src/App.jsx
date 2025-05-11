@@ -25,6 +25,7 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import UserOrder from "./pages/UserOrder";
 import OrderPageAdmin from "./pages/OrderPageAdmin";
+import PageNotFound from "./pages/404Page";
 
 // Route configurations
 const ROUTES = {
@@ -65,6 +66,7 @@ function App() {
   return (
     <div className="min-h-screen bg-base-200 transition-colors duration-300" data-theme={theme}>
       <Routes>
+      <Route path="*" element={<PageNotFound />} />
         {/* Public Routes */}
         {ROUTES.public.map(({ path, element: Element }) => (
           <Route
